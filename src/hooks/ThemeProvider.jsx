@@ -6,12 +6,15 @@ import { dark, light } from '@constants/theme';
 
 const ThemeContext = createContext({});
 
+export function getDefaultTheme() {
+    const isBrowserDarkMode = useMediaQuery({ query: '(prefers-color-schema: dark)'});
+    return window.localStorage.getItem('theme') || isBrowserDarkMode ? 'dark' : 'light';
+}
+
 export function ThemeProvider({ children }) {
     // check browser theme info
-    const isBrowserDarkMode = useMediaQuery({ query: '(prefers-color-schema: dark)'});
-    let initTheme = isBrowserDarkMode ? 'dark' : 'light';
+    const initTheme = getDefaultTheme();
     // check local theme info
-    initTheme = window.localStorage.getItem('theme') || initTheme;
     const [themeMode, setThemeMode] = useState(initTheme);
     const theme = themeMode === 'light' ? light : dark;
 
@@ -33,6 +36,5 @@ export const useTheme = () => {
     };
 
     const toggleTheme = () => setMode(themeMode === 'light' ? 'dark' : 'light');
-
     return [themeMode, toggleTheme];
 }

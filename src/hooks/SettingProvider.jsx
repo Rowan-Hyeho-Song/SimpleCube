@@ -3,25 +3,6 @@ import Icon from "@components/common/Icon";
 
 export const settingMenu = [
     { 
-        key: "mode", 
-        type: "dropdown",
-        icon: <Icon icon="CubeDuotone" asset="pi" />,
-        menus: [
-            { 
-                key: "play", 
-                type: "switch", 
-                value: "play", 
-                icon: <Icon icon="CubeDuotone" asset="pi" />,
-            },
-            { 
-                key: "solution", 
-                type: "switch", 
-                value: "solution", 
-                icon: <Icon icon="LightbulbDuotone" asset="pi" />,
-            },
-        ],
-    },
-    { 
         key: "theme",
         type: "dropdown",
         icon: <Icon icon="CircleHalfFill" asset="pi" />,
@@ -37,6 +18,25 @@ export const settingMenu = [
                 type: "switch",
                 value: "dark", 
                 icon: <Icon icon="MoonDuotone " asset="pi" />,
+            },
+        ],
+    },
+    { 
+        key: "mode", 
+        type: "dropdown",
+        icon: <Icon icon="CubeDuotone" asset="pi" />,
+        menus: [
+            { 
+                key: "play", 
+                type: "switch", 
+                value: "play", 
+                icon: <Icon icon="CubeDuotone" asset="pi" />,
+            },
+            { 
+                key: "solution", 
+                type: "switch", 
+                value: "solution", 
+                icon: <Icon icon="LightbulbDuotone" asset="pi" />,
             },
         ],
     },

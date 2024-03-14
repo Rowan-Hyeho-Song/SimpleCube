@@ -35,6 +35,6 @@ export const useTheme = () => {
         window.localStorage.setItem('theme', mode);
     };
 
-    const toggleTheme = () => setMode(themeMode === 'light' ? 'dark' : 'light');
-    return [themeMode, toggleTheme];
+    // const toggleTheme = () => setMode(themeMode === 'light' ? 'dark' : 'light');
+    return [themeMode, setMode];
 }

@@ -1,3 +1,23 @@
 {
-    "setting": {}
+    "setting": {
+        "tooltip": {
+            "theme": "Color Theme Settings",
+            "mode": "Run Mode Settings",
+            "cubeType": "Type of cube Settings",
+            "customColor": "Color Customization",
+            "penalty": "Penalty Settings",
+            "language": "Language Settings",
+            "light": "Light Theme",
+            "dark": "Dark Theme",
+            "play": "Playing Mode",
+            "solution": "Solving Mode",
+            "cube2": "2X2X2 Cube",
+            "cube3": "3X3X3 Cube",
+            "blind": "Hide the color of the cube",
+            "countLimit": "Limit the number of rotations",
+            "timeLimit": "Place a time limit",
+            "ko-KR": "Korean",
+            "en-US": "English(US)"
+        }
+    }
 }

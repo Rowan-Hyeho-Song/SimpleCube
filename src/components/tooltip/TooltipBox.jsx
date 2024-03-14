@@ -15,6 +15,7 @@ const Container = styled.div`
     color: #ffffff;
     padding: 5px 10px;
     border-radius: 4px;
+    white-space: nowrap;
     pointer-events: none;
 
     animation: ${popup} 0.3s forwards;

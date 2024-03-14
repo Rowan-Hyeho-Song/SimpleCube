@@ -25,7 +25,7 @@ const getPosition = (ref, direction, gap) => {
     const target = ref.current;
     let { top, left } = target?.getBoundingClientRect() || { top: 0, left: 0 };
     const targetOffset = { width: target?.clientWidth, height: target?.clientHeight };
-    const screenOffset = { width: window.innerWidth, height: window.innerHeight };
+    // const screenOffset = { width: window.innerWidth, height: window.innerHeight };
 
     let t;
     if (direction.indexOf("Top") == 0 || direction.indexOf("Bottom") == 0) {
@@ -70,10 +70,10 @@ const getPosition = (ref, direction, gap) => {
 function Tooltip({
     children,
     message,
-    className,
+    className = "",
     direction = "Top",
     delay = 0,
-    gap = 5
+    gap = 5,
 }) {
     const [show, setShow] = useState(false);
     const ref = useRef();
@@ -81,7 +81,7 @@ function Tooltip({
 
     const handleMouseOver = debounce(() => {
         pos.current = getPosition(ref, direction, gap);
-        setShow(true);
+        className.indexOf("disabled") > -1 || setShow(true);
     }, delay);
     const handlMouseLeave = () => {
         setShow(false);
@@ -98,7 +98,7 @@ function Tooltip({
             {children}
             { show &&
                 <TooltipPortal>
-                    <TooltipBox message={message} style={pos.current?.style} direction={pos.current?.direction} />
+                    <TooltipBox className="tooltip-box" message={message} style={pos.current?.style} direction={pos.current?.direction} />
                 </TooltipPortal>
             }
         </Container>

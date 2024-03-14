@@ -1,3 +1,23 @@
 {
-    "setting": {}
+    "setting": {
+        "tooltip": {
+            "theme": "색상 테마 설정",
+            "mode": "실행 모드 설정",
+            "cubeType": "큐브 종류 설정",
+            "customColor": "사용자 지정 색상 설정",
+            "penalty": "패널티 설정",
+            "language": "언어 설정",
+            "light": "라이트 테마",
+            "dark": "다크 테마",
+            "play": "플레이 모드",
+            "solution": "풀이 모드",
+            "cube2": "2X2X2 큐브",
+            "cube3": "3X3X3 큐브",
+            "blind": "큐브의 색상을 감춥니다",
+            "countLimit": "회전 횟수에 제한을 둡니다",
+            "timeLimit": "시간 제한을 둡니다",
+            "ko-KR": "한국어",
+            "en-US": "영어(미국)"
+        }
+    }
 }

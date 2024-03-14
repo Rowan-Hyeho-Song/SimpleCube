@@ -1,6 +1,8 @@
 export const dark = {
     background: "#2a2a2a",
     font: "#ffffff",
+    checkedColor: "#2255dd",
+    checkedFont: "#ffffff",
     menu: {
         background: "#161616",
         activeBackground: "#a4a4a4",
@@ -16,6 +18,8 @@ export const dark = {
 export const light = {
     background: "#ffffff",
     font: "#2a2a2a",
+    checkedColor: "#2255dd",
+    checkedFont: "#ffffff",
     menu: {
         background: "#2a2a2a",
         activeBackground: "#ffffff", 

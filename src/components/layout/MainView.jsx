@@ -1,5 +1,7 @@
+import { useState } from "react";
 import styled from "styled-components";
 import CubeContainer from "@components/cube/CubeContainer";
+
 
 const MainContainer = styled.div`
     width: 100%;
@@ -9,7 +11,8 @@ const MainContainer = styled.div`
 
 function MainView() {
     return (
-        <MainContainer></MainContainer>
+        <MainContainer>
+        </MainContainer>
     );
 }
 

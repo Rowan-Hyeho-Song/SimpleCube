@@ -10,6 +10,7 @@ const Container = styled.div`
     position: absolute;
     background-color: ${({theme}) => theme.menu.background};
     color: ${({theme}) => theme.menu.font};
+    z-index: 10;
 
     &.Pc, &.Tablet {
         --width: 60px;

@@ -72,8 +72,6 @@ function SettingBar() {
     const viewMode = getViewMode();
     const gap = { Pc: 20, Tablet: 20, Mobile: 10 };
 
-    const ref = useRef();
-
     const getSettingItem = (item, i) => {
         const fn = {
             dropdown: (children) => {

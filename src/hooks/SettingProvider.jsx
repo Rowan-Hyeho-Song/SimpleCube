@@ -139,11 +139,15 @@ export const settingMenu = [
     }
 ];
 
-const SettingContext = createContext({});
+export const SettingContext = createContext({});
 export function SettingProvider({children}) {
     const [mode, setMode] = useState("play");
     const [cubeType, setCubeType] = useState("cube3");
-    const [customColor, setCustomColor] = useState([]);
+    const [customColor, setCustomColor] = useState({
+        top: null, bottom: null,
+        left: null, right: null,
+        front: null, back: null
+    });
     const [penalty, setPenalty] = useState([]);
     const [language, setLanguage] = useState(i18n.language);
 

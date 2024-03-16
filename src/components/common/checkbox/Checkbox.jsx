@@ -37,6 +37,7 @@ function Checkbox({
     type = "checkbox",
     disabled,
     checked,
+    value,
     onChange
 }) {
     const context = useContext(CheckboxContext);
@@ -50,12 +51,12 @@ function Checkbox({
     if (context) {
         const { isDisabled, isChecked, toggleValue } = context;
         fn.disabled = isDisabled(disabled);
-        fn.checked = isChecked(checked);
-        fn.onChange = ({target: { checked }}) => toggleValue({checked, value});
+        fn.checked = isChecked(value);
+        fn.onChange = ({ target: { checked }}) => toggleValue({checked, value});
     }
 
     return (
-        <Container className={`${type} ${checked? "checked" : ""} ${className || ""}`}>
+        <Container className={`${type} ${fn.checked? "checked" : ""} ${className || ""}`}>
             <input
                 type="checkbox" disabled={fn.disabled} checked={fn.checked}
                 onChange={fn.onChange}
@@ -64,8 +65,8 @@ function Checkbox({
                 <>{children}</>
             ) : (
                 <>
-                    <span className={`check-icon ${checked ? "checked" : ""}`}>
-                        <Icon icon={checked? "CheckSquareFill" : "Square" } asset="pi" />
+                    <span className={`check-icon ${fn.checked ? "checked" : ""}`}>
+                        <Icon icon={fn.checked? "CheckSquareFill" : "Square" } asset="pi" />
                     </span>
                     {children}
                 </>

@@ -12,6 +12,7 @@ const MainContainer = styled.div`
 function MainView() {
     return (
         <MainContainer>
+            <CubeContainer></CubeContainer>
         </MainContainer>
     );
 }

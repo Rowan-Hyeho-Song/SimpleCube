@@ -10,6 +10,7 @@ const Container = styled.div`
     position: absolute;
     background-color: ${({theme}) => theme.menu.background};
     color: ${({theme}) => theme.menu.font};
+    z-index: 10;
 
     &.Pc, &.Tablet {
         --width: 60px;
@@ -70,8 +71,6 @@ function SettingBar() {
     const { t } = useTranslation();
     const viewMode = getViewMode();
     const gap = { Pc: 20, Tablet: 20, Mobile: 10 };
-
-    const ref = useRef();
 
     const getSettingItem = (item, i) => {
         const fn = {

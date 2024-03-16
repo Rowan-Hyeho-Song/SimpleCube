@@ -12,7 +12,15 @@ export const dark = {
         font: "#ffffff",
         activeFont: "#2a2a2a",
     },
-    faceColor: ["#ffffff", "#fe8fe7", "#fe7000", "#9de53e", "#f9c42c", "#339dd1"],
+    cubeBase: "#000000",
+    faceColor: {
+        top: "#ffffff", 
+        bottom: "#f9c42c",
+        left: "#9de53e",
+        right: "#339dd1",
+        front: "#fe7000",
+        back: "#fe8fe7",
+    },
 };
 
 export const light = {
@@ -29,5 +37,13 @@ export const light = {
         font: "#ffffff",
         activeFont: "#2a2a2a",
     },
-    faceColor: ["#ffffff", "#cc0000", "#ee6600", "#009922", "#ffcc00", "#2255dd"],
+    cubeBase: "#2a2a2a",
+    faceColor: {
+        top: "#ffffff", 
+        bottom: "#ffcc00",
+        left: "#009922",
+        right: "#2255dd",
+        front: "#ee6600",
+        back: "#cc0000",
+    }
 };

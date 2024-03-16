@@ -3,9 +3,9 @@ import styled from "styled-components";
 import Piece from "@components/cube/Piece";
 
 const SCCube = styled.div`
-    font-size: calc(2 * 100%);
-    margin-top: calc(-2em / 2);
-    margin-left: calc(-2em / 2);
+    font-size: calc(var(--cube-scale) * 100%);
+    margin-top: calc(var(--cube-size) / -2);
+    margin-left: calc(var(--cube-size) / -2);
 `;
 
 // i번째 조각에서 j번째 인접한 조각으로 이동하기 위한 방향 반환
@@ -13,7 +13,6 @@ const mx = (i, j) => {
     const moves = [2, 4, 3, 5];
     const numMoves = moves.length;
 
-    // 이동 종류와 방향 결정
     const moveIndex = (j % numMoves |0);
     const rotateDirection = i % 2;
     const rotateOffset = ((j|0) % numMoves * 2 + 3);
@@ -51,7 +50,7 @@ function Cube({
             if (!pieces[i].stickers.includes(face)) {
                 pieces[i].stickers.push(face);
             }
-            const val = type === "cube2" ? 1 : 2;
+            const val = type === "cube2" ? 1.5 : 2;
             return `translate${getAxis(face)}(${face % 2 === 0 ? -val : val}em) `;
         };
         // 0~5 : center, 6~17: edge, 18~26: corner

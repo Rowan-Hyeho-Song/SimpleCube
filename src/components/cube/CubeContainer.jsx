@@ -8,6 +8,15 @@ const Container = styled.div`
     perspective: 1200px;
     transform-style: preserve-3d;
 
+    &.cube2 {
+        --cube-size: 3em;
+        --cube-scale: 2;
+    }
+    &.cube3 {
+        --cube-size: 2em;
+        --cube-scale: 2;
+    }
+
     div {
         position: absolute;
         transform-style: inherit;
@@ -26,8 +35,8 @@ const SCPivot = styled.div`
 `;
 const SCGuide = styled.div`
     .anchor {
-        width: 2em;
-        height: calc(2em * 3);
+        width: var(--cube-size);
+        height: calc(var(--cube-size) * 3);
     }
 `;
 
@@ -66,8 +75,9 @@ function Guide({
 function CubeContainer({
     cubeSize = 100
 }) {
+    const [cubeType] = useCubeType();
     return (
-        <Container>
+        <Container className={cubeType}>
             <Pivot id="pivot" />
             <Guide id="guide" />
         </Container>

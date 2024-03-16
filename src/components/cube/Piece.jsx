@@ -13,8 +13,8 @@ const faces = [
 
 const SCPiece = styled.div`
     --base-color: ${({theme}) => theme.cubeBase};
-    width: calc(2em - 0.1em);
-    height: calc(2em - 0.1em);
+    width: calc(var(--cube-size) - 0.1em);
+    height: calc(var(--cube-size) - 0.1em);
 
     .face {
         width: 100%;
@@ -27,7 +27,7 @@ const SCPiece = styled.div`
             const [x, y, z] = rotate;
             return css`
                 &.${position} {
-                    transform: rotateX(${x}deg) rotateY(${y}deg) rotateZ(${z}deg) translateZ(calc(2em / 2));
+                    transform: rotateX(${x}deg) rotateY(${y}deg) rotateZ(${z}deg) translateZ(calc(var(--cube-size) / 2));
                 }
             `;
         })}
@@ -41,8 +41,8 @@ const SCPiece = styled.div`
             margin: auto;
             
             transform: translateZ(2px);
-            width: 95%;
-            height: 95%;
+            width: 90%;
+            height: 90%;
             border-radius: 10%;
 
             ${({theme, custom}) => {

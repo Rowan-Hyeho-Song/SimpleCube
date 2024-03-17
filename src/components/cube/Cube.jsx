@@ -203,7 +203,7 @@ function Cube({
     };
 
     return (
-        <SCCube ref={cube} className={action}>
+        <SCCube ref={cube} className={`cube ${action}`}>
             { pieces && 
                 pieces.map((props) => {
                     return (

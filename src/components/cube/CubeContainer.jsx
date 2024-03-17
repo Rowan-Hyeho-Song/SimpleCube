@@ -22,6 +22,10 @@ const Container = styled.div`
     &.enable-transform {
         color: white;
         cursor: url("/cursor/rotate3d-${({theme}) => theme.cursor}.svg"), auto;
+
+        .cube {
+            pointer-events: none;
+        }
     }
 
     div {

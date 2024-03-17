@@ -45,10 +45,10 @@ const SCPiece = styled.div`
             height: 90%;
             border-radius: 10%;
 
-            ${({theme, custom}) => {
+            ${({theme, $custom}) => {
                 const face = theme.faceColor;
                 return faces.map(({ position }) => {
-                    const color = custom[position] || face[position];
+                    const color = $custom[position] || face[position];
                     return css`
                         &.${position}-color {
                             background-color: ${color};
@@ -63,16 +63,31 @@ const SCPiece = styled.div`
 function Piece({
     id,
     style = {},
-    stickers = []
+    stickers = { left: false, right: false, top: false, bottom: false, back: false, front: false }
 }) {
     const [customColor] = useCustomColor();
+    const getCubeTypeClass = () => {
+        let cls;
+        const stickerCount  = Object.values(stickers).filter((bool) => bool).length;
+        switch(stickerCount) {
+            case 1: 
+                cls = "center"; break;
+            case 2:
+                cls = "edge"; break;
+            case 3:
+                cls = "corner"; break;
+        }
+        return cls;
+    }
     return (
-        <SCPiece id={id} style={style} custom={customColor}>
-            {faces.map(({position}, i) => {
-                const hasSticker = stickers.includes(i);
+        <SCPiece id={id} className={getCubeTypeClass()} 
+            style={style} $custom={customColor} 
+        >
+            {faces.map(({position}) => {
+                const hasSticker = stickers[position];
                 return (
                     <div key={position} className={`face ${position}`}>
-                        { hasSticker && <div className={`sticker ${position}-color`}></div>}
+                        { hasSticker && <div className={`sticker ${stickers[position]}-color`}></div>}
                     </div>
                 );
             })}

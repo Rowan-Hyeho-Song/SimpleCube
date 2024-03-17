@@ -19,5 +19,11 @@
             "ko-KR": "Korean",
             "en-US": "English(US)"
         }
+    },
+    "control": {
+        "button": {
+            "shuffle": "Shuffle Cube",
+            "play": "Start Play"
+        }
     }
 }

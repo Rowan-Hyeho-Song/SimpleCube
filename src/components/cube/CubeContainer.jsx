@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
+import { useTranslation } from "react-i18next";
 import Cube from "@components/cube/Cube";
 import { SettingContext, useCubeType } from "@hooks/SettingProvider";
-import { LuRotate3D } from "react-icons/lu";
 
 const Container = styled.div`
     width: 100%;
@@ -21,12 +21,41 @@ const Container = styled.div`
 
     &.enable-transform {
         color: white;
-        cursor: url("src/assets/cursor/rotate3d-${({theme}) => theme.cursor}.svg"), auto;
+        cursor: url("/cursor/rotate3d-${({theme}) => theme.cursor}.svg"), auto;
     }
 
     div {
         position: absolute;
         transform-style: inherit;
+    }
+
+    .button-group {
+        display: flex;
+        flex-direction: column;
+        width: 300px;
+        bottom: 20%;
+        left: calc(50% - 150px);
+        font-weight: 600;
+        color: ${({theme}) => theme.menu.font};
+
+        .shuffle-or-play {
+            text-align: center;
+            width: 100%;
+            padding: 1em;
+            border-radius: 5px;
+            background-color: ${({theme}) => theme.menu.background};
+            cursor: pointer;
+
+            &:hover {
+                background-color: ${({theme}) => theme.menu.subHoverBackground};
+            }
+            &.shuffle {
+                background-color: ${({theme}) => theme.menu.selectBackground};
+            }
+            &.play {
+                display: none;
+            }
+        }
     }
 `;
 const SCPivot = styled.div`
@@ -58,14 +87,33 @@ function Pivot({
     container
 }) {
     const [cubeType] = useCubeType();
+    const [cubeAction, setCubeAction] = useState("init");
+    const { t } = useTranslation();
+
+    const updateCubeAction = () => {
+        const actions = ["init", "shuffle", "play", "solving"];
+        const now = actions.findIndex((action) => action === cubeAction);
+        setCubeAction(actions[now + 1]);
+    };
+
     return (
-        <SCPivot 
-            id={id} 
-            style={{transform: "rotateX(-35deg) rotateY(-45deg)"}} 
-            ref={refer}
-        >
-            <Cube type={cubeType} guide={guide} container={container} />
-        </SCPivot>
+        <>
+            <SCPivot 
+                id={id} 
+                style={{transform: "rotateX(-35deg) rotateY(-45deg)"}} 
+                ref={refer}
+            >
+                <Cube type={cubeType} action={cubeAction} guide={guide} container={container} />
+            </SCPivot>
+            <div className="button-group">
+                <div 
+                    className={`shuffle-or-play ${cubeAction}`}
+                    onClick={() => updateCubeAction()}
+                >
+                    {t(`control.button.${cubeAction == "init" ? "shuffle" : "play"}`)}
+                </div>
+            </div>
+        </>
     );
 }
 

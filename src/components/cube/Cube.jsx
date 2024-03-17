@@ -6,6 +6,10 @@ const SCCube = styled.div`
     font-size: calc(var(--cube-scale) * 100%);
     margin-top: calc(var(--cube-size) / -2);
     margin-left: calc(var(--cube-size) / -2);
+
+    &.shuffle {
+        pointer-events: none;
+    }
 `;
 
 // i번째 조각에서 j번째 인접한 조각으로 이동하기 위한 방향 반환
@@ -27,16 +31,19 @@ const getAxis = (face) => {
 
 function Cube({
     type,
+    action,
     guide,
     container
 }) {
     const [pieces, setPieces] = useState([]);
+    const [answer, setAnswer] = useState("");
     const cube = useRef();
     const count = type == "cube3" ? 26 : 8;
     const faces = ["left", "right", "top", "bottom", "back", "front"];
 
-    const updatePieces = (value) => {
+    const updatePieces = (value, saveAnswer = false) => {
         setPieces(value);
+        saveAnswer && setAnswer(JSON.stringify(value));
     };
 
     // 큐브 조각 초기화
@@ -54,7 +61,7 @@ function Cube({
                 };
             });
             assembleCube(newPieces);
-            updatePieces(newPieces);
+            updatePieces(newPieces, true);
         };
         initCube();
     }, [type]);
@@ -65,6 +72,12 @@ function Cube({
             cube?.current?.removeEventListener("mousedown", mousedown);
         };
     }, [pieces])
+
+    useEffect(() => {
+        if (action == "shuffle") {
+            shuffleCube();
+        }
+    }, [action]);
 
     const mousedown = (md_e) => {
         const element = md_e.target.closest(".face");
@@ -140,13 +153,24 @@ function Cube({
                 const stickerB = pieces[pieceB.index].stickers[b];
                 const className = stickerA;
                 if (className) {
-                    console.log(i, j, " :: ", stickerA, stickerB);
                     pieces[pieceA.index].stickers[a] = stickerB;
                     pieces[pieceB.index].stickers[b] = stickerA;
                 }
             }
         }
         updatePieces(pieces);
+    };
+
+    // 큐브 섞기
+    const shuffleCube = () => {
+        // 10 ~ 20 회 중 랜덤
+        const times = Math.floor((Math.random() * 10) + 10);
+        for(let i = 0; i < times; i++) {
+            const clockwise = Math.floor(Math.random());
+            const face = Math.floor(Math.random() * 6);
+            swapPieces(face, 3 - 2 * clockwise);
+        }
+        updatePieces(JSON.parse(JSON.stringify(pieces)));
     };
 
     // 회전 애니메이션
@@ -172,7 +196,6 @@ function Cube({
                 requestAnimationFrame(rotatePieces);
                 updatePieces(newPieces);
             } else {
-                console.log("swap...", face, 3 - 2 * clockwise);
                 swapPieces(face, 3 - 2 * clockwise);
             }
         };
@@ -180,7 +203,7 @@ function Cube({
     };
 
     return (
-        <SCCube ref={cube}>
+        <SCCube ref={cube} className={action}>
             { pieces && 
                 pieces.map((props) => {
                     return (

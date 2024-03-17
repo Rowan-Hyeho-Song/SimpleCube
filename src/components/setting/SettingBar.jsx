@@ -28,7 +28,7 @@ const Container = styled.div`
         width: var(--width);
         height: 100vh;
         padding: var(--padding);
-        > div {
+        > div > div {
             border-radius: 4px;
             margin-bottom: var(--padding);
 
@@ -90,7 +90,7 @@ function SettingBar() {
                     settingMenu.map((item, i) => {
                         const contents = getSettingItem(item, i);
                         return (
-                            <> 
+                            <div key={`setting-${i}`}> 
                                 {contents(
                                     <Tooltip 
                                         key={`setting-item-${i}`} className="setting-item-tooltip" name={item.key}
@@ -100,7 +100,7 @@ function SettingBar() {
                                         <div className="button">{item.icon}</div>
                                     </Tooltip>
                                 )}
-                            </>
+                            </div>
                         );
                     })
                 }

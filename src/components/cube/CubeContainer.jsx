@@ -22,6 +22,10 @@ const Container = styled.div`
     &.enable-transform {
         color: white;
         cursor: url("/cursor/rotate3d-${({theme}) => theme.cursor}.svg"), auto;
+
+        .cube {
+            pointer-events: none;
+        }
     }
 
     div {
@@ -75,9 +79,7 @@ const SCPivot = styled.div`
     }
 `;
 const SCGuide = styled.div`
-    .anchor {
-        background-color: rgba(255, 0, 0, 0.2);
-    }
+    .anchor {}
 `;
 
 function Pivot({

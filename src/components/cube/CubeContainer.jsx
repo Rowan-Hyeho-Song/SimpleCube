@@ -90,6 +90,10 @@ function Pivot({
     const [cubeAction, setCubeAction] = useState("init");
     const { t } = useTranslation();
 
+    useEffect(() => {
+        setCubeAction("init");
+    }, [cubeType]);
+
     const updateCubeAction = () => {
         const actions = ["init", "shuffle", "play", "solving"];
         const now = actions.findIndex((action) => action === cubeAction);

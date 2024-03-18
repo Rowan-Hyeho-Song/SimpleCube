@@ -2,7 +2,9 @@ import { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 import { useTranslation } from "react-i18next";
 import Cube from "@components/cube/Cube";
+import { getViewMode } from "@utils/MediaQuery";
 import { SettingContext, useCubeType } from "@hooks/SettingProvider";
+import EventUtil from "@utils/EventUtil";
 
 const Container = styled.div`
     width: 100%;
@@ -17,15 +19,6 @@ const Container = styled.div`
     &.cube3 {
         --cube-size: 2em;
         --cube-scale: 2;
-    }
-
-    &.enable-transform {
-        color: white;
-        cursor: url("/cursor/rotate3d-${({theme}) => theme.cursor}.svg"), auto;
-
-        .cube {
-            pointer-events: none;
-        }
     }
 
     div {
@@ -49,9 +42,11 @@ const Container = styled.div`
             border-radius: 5px;
             background-color: ${({theme}) => theme.menu.background};
             cursor: pointer;
-
-            &:hover {
-                background-color: ${({theme}) => theme.menu.subHoverBackground};
+            
+            @media (hover: hover) and (pointer: fine) {
+                &:hover {
+                    background-color: ${({theme}) => theme.menu.subHoverBackground};
+                }
             }
             &.shuffle {
                 background-color: ${({theme}) => theme.menu.selectBackground};
@@ -78,8 +73,10 @@ const SCPivot = styled.div`
         height: calc(var(--cube-size) * 3);
     }
 `;
+// background-color: rgba(255, 0, 0, 0.2);
 const SCGuide = styled.div`
-    .anchor {}
+    .anchor {
+    }
 `;
 
 function Pivot({
@@ -146,57 +143,46 @@ function Guide({
 }
 
 function CubeContainer({
-    cubeSize = 100
 }) {
-    const [activeTransform, setActiveTransform] = useState(false);
     const [cubeType] = useCubeType();
     const containerRef = useRef();
     const pivotRef = useRef();
     const guideRef = useRef();
+    const viewMode = getViewMode();
+    const eventType = EventUtil.getEventType(viewMode);
 
     // keydown 이벤트 설정 - spacebar를 누르고 있을때만 transform 이벤트 활성화
     useEffect(() => {
-        const keydown = (e) => {
-            if (e.keyCode === 32 && !activeTransform) {
-                setActiveTransform(true);
-                window.addEventListener("keyup", keyup);
-            }
-        };
-        const keyup = (e) => {
-            if (e.keyCode === 32) {
-                setActiveTransform(false);
-                window.removeEventListener("keyup", keyup);
-            }
-        };
-        window.addEventListener("keydown", keydown);
-        document.ondragstart = () => { return false; }; 
+        const onDragStart = () => { return false; };
+        document.ondragstart = onDragStart; 
         return () => {
-            window.removeEventListener("keydown", keydown);
+            document.ondragstart = null;
         }
     }, []);
 
     const mousedown = (md_e) => {
-        if (activeTransform) {
-            const targetStyle = pivotRef.current.style;
-            const startXY = targetStyle.transform.match(/-?\d+\.?\d*/g).map(Number);
-            const container = containerRef.current;
-            const mousemove = (mm_e) => {
-                targetStyle.transform = `rotateX(${(startXY[0] - (mm_e.pageY - md_e.pageY) / 2)}deg)` +
-                                        `rotateY(${(startXY[1] + (mm_e.pageX - md_e.pageX) / 2)}deg)`;
-            };
-            const mouseup = () => {
-                container.removeEventListener("mousemove", mousemove);
-                container.removeEventListener("mouseup", mouseup);
-            };
-            container.addEventListener("mousemove", mousemove);
-            container.addEventListener("mouseup", mouseup);
-        }
+        const md_event = EventUtil.getEventByDevice(viewMode, md_e);
+        const targetStyle = pivotRef.current.style;
+        const startXY = targetStyle.transform.match(/-?\d+\.?\d*/g).map(Number);
+        const container = containerRef.current;
+        const mousemove = (mm_e) => {
+            const mm_event = EventUtil.getEventByDevice(viewMode, mm_e);
+            targetStyle.transform = `rotateX(${(startXY[0] - (mm_event.pageY - md_event.pageY) / 2)}deg)` +
+                                    `rotateY(${(startXY[1] + (mm_event.pageX - md_event.pageX) / 2)}deg)`;
+        };
+        const mouseup = () => {
+            container.removeEventListener(eventType.mousemove, mousemove);
+            container.removeEventListener(eventType.mouseup, mouseup);
+        };
+        container.addEventListener(eventType.mousemove, mousemove);
+        container.addEventListener(eventType.mouseup, mouseup);
     };
 
     return (
         <Container 
-            className={`${cubeType} ${activeTransform ? "enable-transform" : ""}`}
+            className={`${cubeType}`}
             onMouseDown={mousedown}
+            onTouchStart={mousedown}
             ref={containerRef}
         >
             <Pivot id="pivot" refer={pivotRef} guide={guideRef} container={containerRef} />

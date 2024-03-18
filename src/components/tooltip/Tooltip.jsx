@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { debounce } from "lodash";
 import TooltipPortal from "@components/tooltip/TooltipPortal";
 import TooltipBox from "@components/tooltip/TooltipBox";
+import { getViewMode } from "@utils/MediaQuery";
 
 const Container = styled.div`
 `;
@@ -75,13 +76,16 @@ function Tooltip({
     delay = 0,
     gap = 5,
 }) {
+    const viewMode = getViewMode();
     const [show, setShow] = useState(false);
     const ref = useRef();
     const pos = useRef();
 
     const handleMouseOver = debounce(() => {
-        pos.current = getPosition(ref, direction, gap);
-        className.indexOf("disabled") > -1 || setShow(true);
+        if (viewMode !== "Mobile") {
+            pos.current = getPosition(ref, direction, gap);
+            className.indexOf("disabled") > -1 || setShow(true);
+        }
     }, delay);
     const handlMouseLeave = () => {
         setShow(false);

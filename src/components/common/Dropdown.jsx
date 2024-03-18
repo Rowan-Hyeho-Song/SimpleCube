@@ -32,8 +32,10 @@ const Container = styled.div`
                     background-color: ${({theme}) => theme.menu.background};
                     color: ${({theme}) => theme.menu.font};
 
-                    &:hover {
-                        background-color: ${({theme}) => theme.menu.subHoverBackground};
+                    @media (hover: hover) and (pointer: fine) { 
+                        &:hover {
+                            background-color: ${({theme}) => theme.menu.subHoverBackground};
+                        }
                     }
                     &.checked {
                         background-color: ${({theme}) => theme.menu.selectBackground};
@@ -56,8 +58,10 @@ const Container = styled.div`
                     background-color: ${({theme}) => theme.menu.background};
                     color: ${({theme}) => theme.menu.font};
                     
-                    &:hover {
-                        background-color: ${({theme}) => theme.menu.subHoverBackground};
+                    @media (hover: hover) and (pointer: fine) {
+                        &:hover {
+                            background-color: ${({theme}) => theme.menu.subHoverBackground};
+                        }
                     }
                     &.checked {
                         background-color: ${({theme}) => theme.menu.selectBackground};

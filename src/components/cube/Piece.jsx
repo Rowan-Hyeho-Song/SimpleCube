@@ -3,12 +3,12 @@ import { useCustomColor } from "@hooks/SettingProvider";
 
 // rotate: [x, y, z]
 const faces = [
-    { position: "left", rotate: [0, -90, 180] },
-    { position: "right", rotate: [0, 90, 90] },
-    { position: "top", rotate: [90, 0, 180] },
-    { position: "bottom", rotate: [-90, 0, -90] },
-    { position: "back", rotate: [0, 180, -90] },
-    { position: "front", rotate: [0, 0, 0] },
+    { position: "left", rotate: [0, -90, 180], color: "green" },
+    { position: "right", rotate: [0, 90, 90], color: "blue"},
+    { position: "top", rotate: [90, 0, 180], color: "white" },
+    { position: "bottom", rotate: [-90, 0, -90], color: "yellow" },
+    { position: "back", rotate: [0, 180, -90], color: "red" },
+    { position: "front", rotate: [0, 0, 0], color: "orange" },
 ];
 
 const SCPiece = styled.div`
@@ -47,11 +47,11 @@ const SCPiece = styled.div`
 
             ${({theme, $custom}) => {
                 const face = theme.faceColor;
-                return faces.map(({ position }) => {
-                    const color = $custom[position] || face[position];
+                return faces.map(({ color }) => {
+                    const bgColor = $custom[color] || face[color];
                     return css`
-                        &.${position}-color {
-                            background-color: ${color};
+                        &.${color} {
+                            background-color: ${bgColor};
                         }
                     `;
                 });
@@ -87,7 +87,7 @@ function Piece({
                 const hasSticker = stickers[position];
                 return (
                     <div key={position} className={`face ${position}`}>
-                        { hasSticker && <div className={`sticker ${stickers[position]}-color`}></div>}
+                        { hasSticker && <div className={`sticker ${stickers[position]}`}></div>}
                     </div>
                 );
             })}

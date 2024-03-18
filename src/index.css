@@ -6,24 +6,24 @@
 }
 @media screen and (min-width: 1601px) and (max-width: 1920px) and (orientation: landscape) {
     body, html {
-        font-size: .75vw;
+        font-size: 16px;
     }
 }
 @media screen and (min-width: 1025px) and (max-width: 1280px) and (orientation: landscape) {
     body, html {
-        font-size: .75vw;
+        font-size: 16px;
     }
 }
 /* Tablet */
 @media screen and (min-width: 426px) and (max-width: 1024px) and (max-aspect-ratio: 4 / 3) {
     body, html {
-        font-size: 1vw;
+        font-size: 16px;
     }
 }
 /* Mobile */
 @media screen and (min-width: 0) and (max-width: 425px) and (max-aspect-ratio: 4 / 3) {
     body, html {
-        font-size: 1.5vw;
+        font-size: 12px;
     }
 }
 

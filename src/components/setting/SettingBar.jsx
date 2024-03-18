@@ -16,7 +16,9 @@ const Container = styled.div`
 
     &.fold {
         background-color: transparent;
-
+        .menu-button {
+            color: ${({theme}) => theme.font};
+        }
         .setting-button {
             display: none;
         }
@@ -31,7 +33,7 @@ const Container = styled.div`
         --width: 40px;
         --padding: 5px;
         --button-size: 30px;
-
+    
         .menu-button {
             position: relative;
             display: flex;

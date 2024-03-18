@@ -144,9 +144,9 @@ export function SettingProvider({children}) {
     const [mode, setMode] = useState("play");
     const [cubeType, setCubeType] = useState("cube3");
     const [customColor, setCustomColor] = useState({
-        top: null, bottom: null,
-        left: null, right: null,
-        front: null, back: null
+        white: null, yellow: null,
+        green: null, blue: null,
+        orange: null, red: null
     });
     const [penalty, setPenalty] = useState([]);
     const [language, setLanguage] = useState(i18n.language);

@@ -73,9 +73,9 @@ const SCPivot = styled.div`
         height: calc(var(--cube-size) * 3);
     }
 `;
+// background-color: rgba(255, 0, 0, 0.2);
 const SCGuide = styled.div`
     .anchor {
-        background-color: rgba(255, 0, 0, 0.2);
     }
 `;
 

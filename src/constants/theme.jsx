@@ -1,5 +1,4 @@
 export const dark = {
-    cursor: "white",
     background: "#2a2a2a",
     font: "#ffffff",
     checkedColor: "#2255dd",
@@ -25,7 +24,6 @@ export const dark = {
 };
 
 export const light = {
-    cursor: "black",
     background: "#ffffff",
     font: "#2a2a2a",
     checkedColor: "#2255dd",

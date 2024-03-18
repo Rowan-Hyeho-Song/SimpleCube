@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 import Piece from "@components/cube/Piece";
+import ArrayUtil from "@utils/ArrayUtil";
 
 const SCCube = styled.div`
     font-size: calc(var(--cube-scale) * 100%);
@@ -36,13 +37,15 @@ function Cube({
     container
 }) {
     const [pieces, setPieces] = useState([]);
+    const lastestPieces = useRef(pieces);
     const [answer, setAnswer] = useState("");
     const cube = useRef();
     const count = type == "cube3" ? 26 : 8;
     const faces = ["left", "right", "top", "bottom", "back", "front"];
+    const colors = ["green", "blue", "white", "yellow", "red", "orange"];
 
     const updatePieces = (value, saveAnswer = false) => {
-        setPieces(value);
+        setPieces(ArrayUtil.deepCopy(value));
         saveAnswer && setAnswer(JSON.stringify(value));
     };
 
@@ -67,6 +70,31 @@ function Cube({
     }, [type]);
 
     useEffect(() => {
+        lastestPieces.current = pieces;
+        const mousedown = (md_e) => {
+            const element = md_e.target.closest(".face");
+            const face = [].indexOf.call((element || cube.current).parentNode.children, element);
+            const mousemove = (mm_e) => {
+                if (element) {
+                    const gid = /\d/.exec(document.elementFromPoint(mm_e.pageX, mm_e.pageY).id);
+                    if (gid?.input.includes("anchor")) {
+                        mouseup();
+                        const e = element.parentNode.children[mx(face, Number(gid) + 3)].hasChildNodes();
+                        animateRotation(mx(face, Number(gid) + 1 + 2 * e), e, lastestPieces.current, Date.now());
+                    }
+                }
+            };
+            const mouseup = () => {
+                container.current.appendChild(guide.current);
+                cube.current.removeEventListener("mousemove", mousemove);
+                cube.current.removeEventListener("mouseup", mouseup);
+                cube.current.addEventListener("mousedown", mousedown);
+            };
+            (element || container.current).appendChild(guide.current);
+            cube.current.addEventListener("mousemove", mousemove);
+            cube.current.addEventListener("mouseup", mouseup);
+            cube.current.removeEventListener("mousedown", mousedown);
+        };
         cube?.current?.addEventListener("mousedown", mousedown);
         return () => {
             cube?.current?.removeEventListener("mousedown", mousedown);
@@ -79,36 +107,14 @@ function Cube({
         }
     }, [action]);
 
-    const mousedown = (md_e) => {
-        const element = md_e.target.closest(".face");
-        const face = [].indexOf.call((element || cube.current).parentNode.children, element);
-        const mousemove = (mm_e) => {
-            if (element) {
-                const gid = /\d/.exec(document.elementFromPoint(mm_e.pageX, mm_e.pageY).id);
-                if (gid?.input.includes("anchor")) {
-                    mouseup();
-                    const e = element.parentNode.children[mx(face, Number(gid) + 3)].hasChildNodes();
-                    animateRotation(mx(face, Number(gid) + 1 + 2 * e), e, Date.now());
-                }
-            }
-        };
-        const mouseup = () => {
-            container.current.appendChild(guide.current);
-            cube.current.removeEventListener("mousemove", mousemove);
-            cube.current.removeEventListener("mouseup", mouseup);
-            cube.current.addEventListener("mousedown", mousedown);
-        };
-        (element || container.current).appendChild(guide.current);
-        cube.current.addEventListener("mousemove", mousemove);
-        cube.current.addEventListener("mouseup", mouseup);
-        cube.current.removeEventListener("mousedown", mousedown);
-    };
+    
 
     // 각 조각의 위치를 배치하고, 고유한 id와 sticker 부착
     const assembleCube = (pieces) => {
+        // 움직임을 지정할때마다 id값에 변화를 줘서 특정 조건으로 id를 찾을 수 있게 적용
         const moveTo = (face) => {
             id = id + (1 << face);
-            pieces[i].stickers[faces[face]] = faces[face];
+            pieces[i].stickers[faces[face]] = colors[face];
 
             const val = type === "cube2" ? 1.5 : 2;
             return `translate${getAxis(face)}(${face % 2 === 0 ? -val : val}em) `;
@@ -129,36 +135,34 @@ function Cube({
 
     // 조건에 만족하는 piece의 index, id 반환
     const getPieceBy = (face, index, corner) => {
-        if (type === "cube2") {
-            corner = 1;
-        }
+        corner = type === "cube3" ? corner : 1;
         const id = ((1 << face) + (1 << mx(face, index)) + (1 << mx(face, index + 1)) * corner);
-        const i = pieces.findIndex((piece) => piece.id === `piece${id}`);
+        const i = lastestPieces.current.findIndex((piece) => piece.id === `piece${id}`);
         return { id, index: i };
     };
 
     const swapPieces = (face, times) => {
         const n = type === "cube3" ? 6 : 3;
         const divider = type === "cube3" ? 2 : 1;
+        const piecesList = lastestPieces.current;
         for (let i = 0; i < n * times; i++) {
             const pieceA = getPieceBy(face, i / divider, i % 2);
             const pieceB = getPieceBy(face, i / divider + 1, i % 2);
-
 
             // 모든 sticker 서로 swap
             for (let j = 0; j < 5; j++) {
                 const a = faces[j < 4 ? mx(face, j) : face];
                 const b = faces[j < 4 ? mx(face, j + 1) : face];
-                const stickerA = pieces[pieceA.index].stickers[a];
-                const stickerB = pieces[pieceB.index].stickers[b];
+                const stickerA = piecesList[pieceA.index].stickers[a];
+                const stickerB = piecesList[pieceB.index].stickers[b];
                 const className = stickerA;
                 if (className) {
-                    pieces[pieceA.index].stickers[a] = stickerB;
-                    pieces[pieceB.index].stickers[b] = stickerA;
+                    piecesList[pieceA.index].stickers[a] = stickerB;
+                    piecesList[pieceB.index].stickers[b] = stickerA;
                 }
             }
         }
-        updatePieces(pieces);
+        updatePieces(piecesList);
     };
 
     // 큐브 섞기
@@ -170,32 +174,28 @@ function Cube({
             const face = Math.floor(Math.random() * 6);
             swapPieces(face, 3 - 2 * clockwise);
         }
-        updatePieces(JSON.parse(JSON.stringify(pieces)));
     };
 
     // 회전 애니메이션
-    const animateRotation = (face, clockwise, currentTime) => {
+    const animateRotation = (face, clockwise, pieceList, currentTime) => {
         const k = 0.3 * (face % 2 * 2 - 1) * (2 * clockwise - 1);
         const cubes = Array(9).fill(face).map((value, i) => {
             return i ? getPieceBy(face, i / 2, i % 2).index : value;
         });
         const rotatePieces = () => {
             const passed = Date.now() - currentTime;
-            const style = `rotate${getAxis(face)}(${k * passed * (passed < 300)}deg)`;
+            const rotate = `rotate${getAxis(face)}(${k * passed * (passed < 300)}deg)`;
 
-            const newPieces = pieces.map((piece, i) => {
-                if (cubes.includes(i)) {
-                    const updatePiece = JSON.parse(JSON.stringify(piece));
-                    updatePiece.style.transform = updatePiece.style.transform.replace(/rotate.\(\S+\)/, style);
-                    return updatePiece;
-                }
-                return piece;
+            cubes.forEach((index) => {
+                const { id, style } = pieceList[index];
+                const piece = document.getElementById(id);
+                piece.style.transform = style.transform.replace(/rotate.\(\S+\)/, rotate);
             });
 
             if (passed < 300) {
                 requestAnimationFrame(rotatePieces);
-                updatePieces(newPieces);
             } else {
+                console.log("animation swap before", [...pieceList]);
                 swapPieces(face, 3 - 2 * clockwise);
             }
         };

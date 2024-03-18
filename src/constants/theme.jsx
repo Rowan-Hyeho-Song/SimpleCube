@@ -15,12 +15,12 @@ export const dark = {
     },
     cubeBase: "#000000",
     faceColor: {
-        top: "#ffffff", 
-        bottom: "#f9c42c",
-        left: "#9de53e",
-        right: "#339dd1",
-        front: "#fe7000",
-        back: "#fe8fe7",
+        white: "#ffffff", 
+        yellow: "#f9c42c",
+        green: "#9de53e",
+        blue: "#339dd1",
+        orange: "#fe7000",
+        red: "#fe8fe7",
     },
 };
 
@@ -41,11 +41,11 @@ export const light = {
     },
     cubeBase: "#2a2a2a",
     faceColor: {
-        top: "#ffffff", 
-        bottom: "#ffcc00",
-        left: "#009922",
-        right: "#2255dd",
-        front: "#ee6600",
-        back: "#cc0000",
+        white: "#ffffff", 
+        yellow: "#ffcc00",
+        green: "#009922",
+        blue: "#2255dd",
+        orange: "#ee6600",
+        red: "#cc0000",
     }
 };

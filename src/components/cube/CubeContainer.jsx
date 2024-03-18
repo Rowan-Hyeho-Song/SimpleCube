@@ -79,7 +79,9 @@ const SCPivot = styled.div`
     }
 `;
 const SCGuide = styled.div`
-    .anchor {}
+    .anchor {
+        background-color: rgba(255, 0, 0, 0.2);
+    }
 `;
 
 function Pivot({

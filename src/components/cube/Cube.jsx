@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 import Piece from "@components/cube/Piece";
+import { getViewMode } from "@utils/MediaQuery";
 import ArrayUtil from "@utils/ArrayUtil";
+import EventUtil from "@utils/EventUtil";
 
 const SCCube = styled.div`
     font-size: calc(var(--cube-scale) * 100%);
@@ -43,6 +45,7 @@ function Cube({
     const count = type == "cube3" ? 26 : 8;
     const faces = ["left", "right", "top", "bottom", "back", "front"];
     const colors = ["green", "blue", "white", "yellow", "red", "orange"];
+    const viewMode = getViewMode();
 
     const updatePieces = (value, saveAnswer = false) => {
         setPieces(ArrayUtil.deepCopy(value));
@@ -69,14 +72,19 @@ function Cube({
         initCube();
     }, [type]);
 
+    const eventType = EventUtil.getEventType(viewMode);
+    // Piece의 변경이 있을때마다 이벤트 재할당
     useEffect(() => {
         lastestPieces.current = pieces;
+        const cubeElem = cube?.current;
         const mousedown = (md_e) => {
+            md_e.stopPropagation();
             const element = md_e.target.closest(".face");
-            const face = [].indexOf.call((element || cube.current).parentNode.children, element);
+            const face = [].indexOf.call((element || cubeElem).parentNode.children, element);
             const mousemove = (mm_e) => {
                 if (element) {
-                    const gid = /\d/.exec(document.elementFromPoint(mm_e.pageX, mm_e.pageY).id);
+                    const event = EventUtil.getEventByDevice(viewMode, mm_e);
+                    const gid = /\d/.exec(document.elementFromPoint(event.pageX, event.pageY).id);
                     if (gid?.input.includes("anchor")) {
                         mouseup();
                         const e = element.parentNode.children[mx(face, Number(gid) + 3)].hasChildNodes();
@@ -86,18 +94,18 @@ function Cube({
             };
             const mouseup = () => {
                 container.current.appendChild(guide.current);
-                cube.current.removeEventListener("mousemove", mousemove);
-                cube.current.removeEventListener("mouseup", mouseup);
-                cube.current.addEventListener("mousedown", mousedown);
+                cubeElem.removeEventListener(eventType.mousemove, mousemove);
+                cubeElem.removeEventListener(eventType.mouseup, mouseup);
+                cubeElem.addEventListener(eventType.mousedown, mousedown);
             };
             (element || container.current).appendChild(guide.current);
-            cube.current.addEventListener("mousemove", mousemove);
-            cube.current.addEventListener("mouseup", mouseup);
-            cube.current.removeEventListener("mousedown", mousedown);
+            cubeElem.addEventListener(eventType.mousemove, mousemove);
+            cubeElem.addEventListener(eventType.mouseup, mouseup);
+            cubeElem.removeEventListener(eventType.mousedown, mousedown);
         };
-        cube?.current?.addEventListener("mousedown", mousedown);
+        cubeElem?.addEventListener(eventType.mousedown, mousedown);
         return () => {
-            cube?.current?.removeEventListener("mousedown", mousedown);
+            cubeElem?.removeEventListener(eventType.mousedown, mousedown);
         };
     }, [pieces])
 
@@ -106,8 +114,6 @@ function Cube({
             shuffleCube();
         }
     }, [action]);
-
-    
 
     // 각 조각의 위치를 배치하고, 고유한 id와 sticker 부착
     const assembleCube = (pieces) => {
@@ -195,7 +201,6 @@ function Cube({
             if (passed < 300) {
                 requestAnimationFrame(rotatePieces);
             } else {
-                console.log("animation swap before", [...pieceList]);
                 swapPieces(face, 3 - 2 * clockwise);
             }
         };

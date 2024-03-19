@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 import { useTranslation } from "react-i18next";
-import Cube from "@components/cube/Cube";
 import { getViewMode } from "@utils/MediaQuery";
 import { SettingContext, useCubeType } from "@hooks/SettingProvider";
+import Cube from "@components/cube/Cube";
+import ConfettiExplosion from "react-confetti-explosion";
 import EventUtil from "@utils/EventUtil";
 
 const Container = styled.div`
@@ -94,9 +95,18 @@ function Pivot({
     }, [cubeType]);
 
     const updateCubeAction = () => {
-        const actions = ["init", "shuffle", "play", "solving"];
+        const actions = ["init", "shuffle", "play", "solved"];
         const now = actions.findIndex((action) => action === cubeAction);
-        setCubeAction(actions[now + 1]);
+        setCubeAction(actions[now + 1 == actions.length ? 0 : now + 1]);
+    };
+    const getButtonText = (action) => {
+        const text = {
+            init: "shuffle",
+            shuffle: "play",
+            play: "playing",
+            solved: "solved"
+        };
+        return text[action];
     };
 
     return (
@@ -106,14 +116,18 @@ function Pivot({
                 style={{transform: "rotateX(-35deg) rotateY(-45deg)"}} 
                 ref={refer}
             >
-                <Cube type={cubeType} action={cubeAction} guide={guide} container={container} />
+                <Cube 
+                    type={cubeType} 
+                    action={cubeAction} setAction={setCubeAction}
+                    guide={guide} container={container} />
+                {cubeAction === "solved" && <ConfettiExplosion />}
             </SCPivot>
             <div className="button-group">
                 <div 
                     className={`shuffle-or-play ${cubeAction}`}
                     onClick={() => updateCubeAction()}
                 >
-                    {t(`control.button.${cubeAction == "init" ? "shuffle" : "play"}`)}
+                    {t(`control.button.${getButtonText(cubeAction)}`)}
                 </div>
             </div>
         </>

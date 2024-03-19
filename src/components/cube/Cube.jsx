@@ -35,6 +35,7 @@ const getAxis = (face) => {
 function Cube({
     type,
     action,
+    setAction,
     guide,
     container
 }) {
@@ -75,6 +76,22 @@ function Cube({
     const eventType = EventUtil.getEventType(viewMode);
     // Piece의 변경이 있을때마다 이벤트 재할당
     useEffect(() => {
+        if (action === "play") {
+            const check = {
+                left: [], right: [],
+                top: [], bottom: [],
+                back: [], front: []
+            };
+            pieces.forEach((piece) => {
+                faces.forEach((face) => {
+                    const color = piece.stickers[face];
+                    color && check[face].push(color);
+                });
+            });
+            const isSolved = Object.values(check).every((arr) => new Set(arr).size === 1);
+            isSolved && setAction("solved");
+        }
+
         lastestPieces.current = pieces;
         const cubeElem = cube?.current;
         const mousedown = (md_e) => {

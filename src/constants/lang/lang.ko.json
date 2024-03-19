@@ -23,7 +23,9 @@
     "control": {
         "button": {
             "shuffle": "큐브 섞기",
-            "play": "게임 시작"
+            "play": "게임 시작",
+            "playing": "게임 중...",
+            "solved": "한번 더?"
         }
     }
 }

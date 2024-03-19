@@ -41,16 +41,14 @@ function Cube({
 }) {
     const [pieces, setPieces] = useState([]);
     const lastestPieces = useRef(pieces);
-    const [answer, setAnswer] = useState("");
     const cube = useRef();
     const count = type == "cube3" ? 26 : 8;
     const faces = ["left", "right", "top", "bottom", "back", "front"];
     const colors = ["green", "blue", "white", "yellow", "red", "orange"];
     const viewMode = getViewMode();
 
-    const updatePieces = (value, saveAnswer = false) => {
+    const updatePieces = (value) => {
         setPieces(ArrayUtil.deepCopy(value));
-        saveAnswer && setAnswer(JSON.stringify(value));
     };
 
     // 큐브 조각 초기화
@@ -68,7 +66,7 @@ function Cube({
                 };
             });
             assembleCube(newPieces);
-            updatePieces(newPieces, true);
+            updatePieces(newPieces);
         };
         initCube();
     }, [type]);

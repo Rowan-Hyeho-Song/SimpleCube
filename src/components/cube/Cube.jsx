@@ -35,21 +35,20 @@ const getAxis = (face) => {
 function Cube({
     type,
     action,
+    setAction,
     guide,
     container
 }) {
     const [pieces, setPieces] = useState([]);
     const lastestPieces = useRef(pieces);
-    const [answer, setAnswer] = useState("");
     const cube = useRef();
     const count = type == "cube3" ? 26 : 8;
     const faces = ["left", "right", "top", "bottom", "back", "front"];
     const colors = ["green", "blue", "white", "yellow", "red", "orange"];
     const viewMode = getViewMode();
 
-    const updatePieces = (value, saveAnswer = false) => {
+    const updatePieces = (value) => {
         setPieces(ArrayUtil.deepCopy(value));
-        saveAnswer && setAnswer(JSON.stringify(value));
     };
 
     // 큐브 조각 초기화
@@ -67,7 +66,7 @@ function Cube({
                 };
             });
             assembleCube(newPieces);
-            updatePieces(newPieces, true);
+            updatePieces(newPieces);
         };
         initCube();
     }, [type]);
@@ -75,6 +74,22 @@ function Cube({
     const eventType = EventUtil.getEventType(viewMode);
     // Piece의 변경이 있을때마다 이벤트 재할당
     useEffect(() => {
+        if (action === "play") {
+            const check = {
+                left: [], right: [],
+                top: [], bottom: [],
+                back: [], front: []
+            };
+            pieces.forEach((piece) => {
+                faces.forEach((face) => {
+                    const color = piece.stickers[face];
+                    color && check[face].push(color);
+                });
+            });
+            const isSolved = Object.values(check).every((arr) => new Set(arr).size === 1);
+            isSolved && setAction("solved");
+        }
+
         lastestPieces.current = pieces;
         const cubeElem = cube?.current;
         const mousedown = (md_e) => {

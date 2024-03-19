@@ -23,7 +23,9 @@
     "control": {
         "button": {
             "shuffle": "Shuffle Cube",
-            "play": "Start Play"
+            "play": "Start Play",
+            "playing": "Playing...",
+            "solved": "One More Time?"
         }
     }
 }

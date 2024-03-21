@@ -77,11 +77,11 @@ export const settingMenu = [
             
         ],
     },
-    {
-        key: "customColor",
-        type: "button",
-        icon: <Icon icon="PaletteDuotone" asset="pi" />,
-    },
+    // {
+    //     key: "customColor",
+    //     type: "button",
+    //     icon: <Icon icon="PaletteDuotone" asset="pi" />,
+    // },
     {
         key: "penalty",
         type: "dropdown",
@@ -139,17 +139,26 @@ export const settingMenu = [
     }
 ];
 
+const getLocalStorage = (key, defaultValue = null) => {
+    let val = window.localStorage.getItem(key);
+    try {
+        val = JSON.parse(val);
+    } catch (err) {}
+    return val || defaultValue;
+};
+
 export const SettingContext = createContext({});
 export function SettingProvider({children}) {
-    const [mode, setMode] = useState("play");
-    const [cubeType, setCubeType] = useState("cube3");
-    const [customColor, setCustomColor] = useState({
+    const [mode, setMode] = useState(getLocalStorage("mode", "play"));
+    const [cubeType, setCubeType] = useState(getLocalStorage("cubeType", "cube3"));
+    const [customColor, setCustomColor] = useState(getLocalStorage("customColor", {
         white: null, yellow: null,
         green: null, blue: null,
         orange: null, red: null
-    });
-    const [penalty, setPenalty] = useState([]);
+    }));
+    const [penalty, setPenalty] = useState(getLocalStorage("penalty", []));
     const [language, setLanguage] = useState(i18n.language);
+    
 
     return (
         <SettingContext.Provider value={{
@@ -166,20 +175,37 @@ export function SettingProvider({children}) {
 
 export const useMode = () => {
     const {mode, setMode } = useContext(SettingContext);
-    return [mode, setMode];
+    const setModeLocalStorage = (value) => {
+        setMode(value);
+        window.localStorage.setItem("mode", value);
+    };
+    return [mode, setModeLocalStorage];
 }
 export const useCubeType = () => {
     const {cubeType, setCubeType } = useContext(SettingContext);
-    return [cubeType, setCubeType];
+    const setCubeTypeLocalStorage = (value) => {
+        setCubeType(value);
+        window.localStorage.setItem("cubeType", value);
+    };
+    return [cubeType, setCubeTypeLocalStorage];
 }
 export const useCustomColor = () => {
     const {customColor, setCustomColor } = useContext(SettingContext);
-    return [customColor, setCustomColor];
+    const setCustomColorLocalStorage = (value) => {
+        setCustomColor(value);
+        window.localStorage.setItem("customColor", JSON.stringify(value));
+    };
+    return [customColor, setCustomColorLocalStorage];
 }
 export const usePenalty = () => {
     const {penalty, setPenalty } = useContext(SettingContext);
-    return [penalty, setPenalty];
+    const setPenaltyLocalStorage = (value) => {
+        setPenalty(value);
+        window.localStorage.setItem("penalty", JSON.stringify(value));
+    };
+    return [penalty, setPenaltyLocalStorage];
 }
+
 export const useLanguage = () => {
     const {language, setLanguage } = useContext(SettingContext);
     const changeLanguage = (key) => {

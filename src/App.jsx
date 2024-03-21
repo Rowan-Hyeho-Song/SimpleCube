@@ -1,6 +1,7 @@
 import { createElement } from "react";
 import { ThemeProvider } from "@hooks/ThemeProvider";
 import { SettingProvider } from "@hooks/SettingProvider";
+import { CubeProvider } from "@hooks/CubeProvider";
 import SettingBar from "@components/setting/SettingBar";
 import MainView from "@components/layout/MainView";
 
@@ -12,7 +13,7 @@ const AppProvider = ({ contexts, children }) => contexts.reduce(
 
 function App() {
     return (
-        <AppProvider contexts={[SettingProvider, ThemeProvider]}>
+        <AppProvider contexts={[SettingProvider, ThemeProvider, CubeProvider]}>
             <SettingBar />
             <MainView />
         </AppProvider>

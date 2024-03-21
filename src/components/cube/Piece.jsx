@@ -1,5 +1,6 @@
 import styled, { css } from "styled-components";
-import { useCustomColor } from "@hooks/SettingProvider";
+import { useCustomColor, usePenalty } from "@hooks/SettingProvider";
+import { useAction } from "@hooks/CubeProvider";
 
 // rotate: [x, y, z]
 const faces = [
@@ -56,6 +57,24 @@ const SCPiece = styled.div`
                     `;
                 });
             }}
+
+            &.blind {
+                > div {
+                    width: 100%;
+                    height: 100%;
+                    border-radius: 10%;
+                    background-color: #0ef;
+                    opacity: 1;
+                    transform: translateZ(2px) scale(0.6);
+                    z-index: 10;
+
+                    &:not(.base) {
+                        animation: pulseAnimate 3s ease-out infinite;
+                        animation-delay: calc(1s * var(--i));
+                        z-index: var(--i);
+                    }
+                }
+            }
         }
     }
 `;
@@ -66,6 +85,8 @@ function Piece({
     stickers = { left: false, right: false, top: false, bottom: false, back: false, front: false }
 }) {
     const [customColor] = useCustomColor();
+    const [penalty] = usePenalty();
+    const [action] = useAction(); 
     const getCubeTypeClass = () => {
         let cls;
         const stickerCount  = Object.values(stickers).filter((bool) => bool).length;
@@ -85,9 +106,22 @@ function Piece({
         >
             {faces.map(({position}) => {
                 const hasSticker = stickers[position];
+                const isBlind = penalty.includes("blind") && ["play", "solved"].includes(action);
                 return (
                     <div key={position} className={`face ${position}`}>
-                        { hasSticker && <div className={`sticker ${stickers[position]}`}></div>}
+                        { hasSticker && (
+                            <div className={`sticker ${isBlind ? "blind" : stickers[position]}`}>
+                                {
+                                    isBlind && (
+                                        <>
+                                            <div className="base"></div>
+                                            <div style={{"--i": 0}}></div>
+                                            <div style={{"--i": 1}}></div>
+                                            <div style={{"--i": 2}}></div>
+                                        </>
+                                )}
+                            </div>
+                        )}
                     </div>
                 );
             })}

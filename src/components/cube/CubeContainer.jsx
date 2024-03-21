@@ -2,7 +2,9 @@ import { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 import { useTranslation } from "react-i18next";
 import { getViewMode } from "@utils/MediaQuery";
-import { SettingContext, useCubeType } from "@hooks/SettingProvider";
+import { useCubeType, usePenalty } from "@hooks/SettingProvider";
+import { CubeProvider, useAction, useCubeRotate } from "@hooks/CubeProvider";
+import CubeController from "@components/cube/CubeController";
 import Cube from "@components/cube/Cube";
 import ConfettiExplosion from "react-confetti-explosion";
 import EventUtil from "@utils/EventUtil";
@@ -26,37 +28,6 @@ const Container = styled.div`
         position: absolute;
         transform-style: inherit;
     }
-
-    .button-group {
-        display: flex;
-        flex-direction: column;
-        width: 300px;
-        bottom: 20%;
-        left: calc(50% - 150px);
-        font-weight: 600;
-        color: ${({theme}) => theme.menu.font};
-
-        .shuffle-or-play {
-            text-align: center;
-            width: 100%;
-            padding: 1em;
-            border-radius: 5px;
-            background-color: ${({theme}) => theme.menu.background};
-            cursor: pointer;
-            
-            @media (hover: hover) and (pointer: fine) {
-                &:hover {
-                    background-color: ${({theme}) => theme.menu.subHoverBackground};
-                }
-            }
-            &.shuffle {
-                background-color: ${({theme}) => theme.menu.selectBackground};
-            }
-            &.play {
-                display: none;
-            }
-        }
-    }
 `;
 const SCPivot = styled.div`
     position: absolute;
@@ -67,7 +38,7 @@ const SCPivot = styled.div`
     width: 0;
     height: 0;
     margin: auto;
-    transition: 0.1s;
+    transition: 0.3s;
 
     .anchor {
         width: var(--cube-size);
@@ -87,49 +58,21 @@ function Pivot({
     container
 }) {
     const [cubeType] = useCubeType();
-    const [cubeAction, setCubeAction] = useState("init");
-    const { t } = useTranslation();
-
-    useEffect(() => {
-        setCubeAction("init");
-    }, [cubeType]);
-
-    const updateCubeAction = () => {
-        const actions = ["init", "shuffle", "play", "solved"];
-        const now = actions.findIndex((action) => action === cubeAction);
-        setCubeAction(actions[now + 1 == actions.length ? 0 : now + 1]);
-    };
-    const getButtonText = (action) => {
-        const text = {
-            init: "shuffle",
-            shuffle: "play",
-            play: "playing",
-            solved: "solved"
-        };
-        return text[action];
-    };
-
+    const [action] = useAction();
+    const [cubeRotate] = useCubeRotate();
+    
     return (
         <>
             <SCPivot 
                 id={id} 
-                style={{transform: "rotateX(-35deg) rotateY(-45deg)"}} 
+                style={{transform: `rotateX(${cubeRotate[0]}deg) rotateY(${cubeRotate[1]}deg)`}} 
                 ref={refer}
             >
                 <Cube 
-                    type={cubeType} 
-                    action={cubeAction} setAction={setCubeAction}
+                    type={cubeType}
                     guide={guide} container={container} />
-                {cubeAction === "solved" && <ConfettiExplosion />}
+                {action === "solved" && <ConfettiExplosion />}
             </SCPivot>
-            <div className="button-group">
-                <div 
-                    className={`shuffle-or-play ${cubeAction}`}
-                    onClick={() => updateCubeAction()}
-                >
-                    {t(`control.button.${getButtonText(cubeAction)}`)}
-                </div>
-            </div>
         </>
     );
 }
@@ -159,6 +102,9 @@ function Guide({
 function CubeContainer({
 }) {
     const [cubeType] = useCubeType();
+    const [penalty] = usePenalty();
+    const [cubeRotate, setCubeRotate] = useCubeRotate();
+    const [action, setAction] = useAction();
     const containerRef = useRef();
     const pivotRef = useRef();
     const guideRef = useRef();
@@ -174,22 +120,63 @@ function CubeContainer({
         }
     }, []);
 
+    useEffect(() => {
+        setCubeRotate([-35, -45]);
+        setAction("init");
+    }, [cubeType, penalty]);
+
     const mousedown = (md_e) => {
         const md_event = EventUtil.getEventByDevice(viewMode, md_e);
-        const targetStyle = pivotRef.current.style;
-        const startXY = targetStyle.transform.match(/-?\d+\.?\d*/g).map(Number);
         const container = containerRef.current;
         const mousemove = (mm_e) => {
             const mm_event = EventUtil.getEventByDevice(viewMode, mm_e);
-            targetStyle.transform = `rotateX(${(startXY[0] - (mm_event.pageY - md_event.pageY) / 2)}deg)` +
-                                    `rotateY(${(startXY[1] + (mm_event.pageX - md_event.pageX) / 2)}deg)`;
+            rotateCube(
+                (mm_event.pageY - md_event.pageY) / 2, 
+                (mm_event.pageX - md_event.pageX) / 2,
+                cubeRotate[0], cubeRotate[1]
+            );
         };
         const mouseup = () => {
             container.removeEventListener(eventType.mousemove, mousemove);
             container.removeEventListener(eventType.mouseup, mouseup);
+            strikeBalance();
         };
         container.addEventListener(eventType.mousemove, mousemove);
         container.addEventListener(eventType.mouseup, mouseup);
+    };
+
+    const rotateCube = (dx, dy, baseX = null, baseY = null) => {
+        const x = baseX != null ? baseX : cubeRotate[0];
+        const y = baseY != null ? baseY : cubeRotate[1];
+        setCubeRotate([x - dx, y + dy]);
+    };
+    const strikeBalance = () => {
+        const targetStyle = pivotRef.current.style;
+        const [x, y] = targetStyle.transform.match(/-?\d+\.?\d*/g).map(Number);
+        const sign = [
+            x > -35 ? 1 : -1,
+            y > -45 ? 1 : -1,
+        ];
+        const xRange = [-35, -35 + 90 * sign[0]];
+        const yRange = [-45, -45 + 90 * sign[1]];
+        const inRange = (range, value) => {
+            const min = Math.min(...range);
+            const max = Math.max(...range);
+            return min <= value && max >= value;
+        };
+        while(!(inRange(xRange, x) && inRange(yRange, y))) {
+            if (!inRange(xRange, x)) {
+                xRange[0] += 90 * sign[0];
+                xRange[1] += 90 * sign[0];
+            }
+            if (!inRange(yRange, y)) {
+                yRange[0] += 90 * sign[1];
+                yRange[1] += 90 * sign[1];
+            }
+        }
+        const targetX = Math.abs(xRange[0] - x) > Math.abs(xRange[1] - x) ? xRange[1] : xRange[0];
+        const targetY = Math.abs(yRange[0] - y) > Math.abs(yRange[1] - y) ? yRange[1] : yRange[0];
+        rotateCube(-targetX, targetY, 0, 0);
     };
 
     return (
@@ -200,6 +187,7 @@ function CubeContainer({
             ref={containerRef}
         >
             <Pivot id="pivot" refer={pivotRef} guide={guideRef} container={containerRef} />
+            <CubeController />
             <Guide id="guide" refer={guideRef} />
         </Container>
     );

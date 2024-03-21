@@ -8,7 +8,7 @@ const ThemeContext = createContext({});
 
 export function getDefaultTheme() {
     const isBrowserDarkMode = useMediaQuery({ query: '(prefers-color-schema: dark)'});
-    return window.localStorage.getItem('theme') || isBrowserDarkMode ? 'dark' : 'light';
+    return window.localStorage.getItem('theme') || (isBrowserDarkMode ? 'dark' : 'light');
 }
 
 export function ThemeProvider({ children }) {

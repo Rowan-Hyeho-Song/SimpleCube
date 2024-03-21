@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import Piece from "@components/cube/Piece";
 import { getViewMode } from "@utils/MediaQuery";
+import { useAction, useCubeCommand } from "@hooks/CubeProvider";
+import { usePenalty } from "@hooks/SettingProvider";
 import ArrayUtil from "@utils/ArrayUtil";
 import EventUtil from "@utils/EventUtil";
 
@@ -9,10 +11,6 @@ const SCCube = styled.div`
     font-size: calc(var(--cube-scale) * 100%);
     margin-top: calc(var(--cube-size) / -2);
     margin-left: calc(var(--cube-size) / -2);
-
-    &.shuffle {
-        pointer-events: none;
-    }
 `;
 
 // i번째 조각에서 j번째 인접한 조각으로 이동하기 위한 방향 반환
@@ -34,18 +32,21 @@ const getAxis = (face) => {
 
 function Cube({
     type,
-    action,
-    setAction,
     guide,
     container
 }) {
     const [pieces, setPieces] = useState([]);
+    const [action, setAction] = useAction();
+    const [cubeCommand, setCubeCommand] = useCubeCommand();
     const lastestPieces = useRef(pieces);
     const cube = useRef();
     const count = type == "cube3" ? 26 : 8;
     const faces = ["left", "right", "top", "bottom", "back", "front"];
+    const commandChar = ["L", "R", "U", "D", "B", "F"];
     const colors = ["green", "blue", "white", "yellow", "red", "orange"];
     const viewMode = getViewMode();
+    const eventType = EventUtil.getEventType(viewMode);
+    const cubeElem = cube?.current;
 
     const updatePieces = (value) => {
         setPieces(ArrayUtil.deepCopy(value));
@@ -68,12 +69,14 @@ function Cube({
             assembleCube(newPieces);
             updatePieces(newPieces);
         };
-        initCube();
-    }, [type]);
+        if (action == "init") {
+            initCube();
+        }
+    }, [type, action]);
 
-    const eventType = EventUtil.getEventType(viewMode);
-    // Piece의 변경이 있을때마다 이벤트 재할당
+    // Piece의 변경이 있을때
     useEffect(() => {
+        // 큐브가 정답인지 확인
         if (action === "play") {
             const check = {
                 left: [], right: [],
@@ -88,47 +91,35 @@ function Cube({
             });
             const isSolved = Object.values(check).every((arr) => new Set(arr).size === 1);
             isSolved && setAction("solved");
+        } else {
+            // 셔플 중인 상태에서는 큐브 위치 변경이 안되도록 이벤트 할당 제한
+            lastestPieces.current = pieces;
+            if (action !== "shuffle") {
+                cubeElem?.addEventListener(eventType.mousedown, mousedown);
+            }
+            return () => {
+                cubeElem?.removeEventListener(eventType.mousedown, mousedown);
+            };
         }
-
-        lastestPieces.current = pieces;
-        const cubeElem = cube?.current;
-        const mousedown = (md_e) => {
-            md_e.stopPropagation();
-            const element = md_e.target.closest(".face");
-            const face = [].indexOf.call((element || cubeElem).parentNode.children, element);
-            const mousemove = (mm_e) => {
-                if (element) {
-                    const event = EventUtil.getEventByDevice(viewMode, mm_e);
-                    const gid = /\d/.exec(document.elementFromPoint(event.pageX, event.pageY).id);
-                    if (gid?.input.includes("anchor")) {
-                        mouseup();
-                        const e = element.parentNode.children[mx(face, Number(gid) + 3)].hasChildNodes();
-                        animateRotation(mx(face, Number(gid) + 1 + 2 * e), e, lastestPieces.current, Date.now());
-                    }
-                }
-            };
-            const mouseup = () => {
-                container.current.appendChild(guide.current);
-                cubeElem.removeEventListener(eventType.mousemove, mousemove);
-                cubeElem.removeEventListener(eventType.mouseup, mouseup);
-                cubeElem.addEventListener(eventType.mousedown, mousedown);
-            };
-            (element || container.current).appendChild(guide.current);
-            cubeElem.addEventListener(eventType.mousemove, mousemove);
-            cubeElem.addEventListener(eventType.mouseup, mouseup);
-            cubeElem.removeEventListener(eventType.mousedown, mousedown);
-        };
-        cubeElem?.addEventListener(eventType.mousedown, mousedown);
-        return () => {
-            cubeElem?.removeEventListener(eventType.mousedown, mousedown);
-        };
-    }, [pieces])
+    }, [pieces]);
 
     useEffect(() => {
         if (action == "shuffle") {
             shuffleCube();
+        } else if (action == "play") {
+            cubeElem?.addEventListener(eventType.mousedown, mousedown);
         }
     }, [action]);
+
+    useEffect(() => {
+        if (cubeCommand.length > 0) {
+            const command = cubeCommand.shift();
+            const clockwise = command.indexOf("'") == -1;
+            const face = commandChar.indexOf(command.replace("'", ""));
+            animateRotation(face, clockwise, lastestPieces.current, Date.now());
+            setCubeCommand([...cubeCommand]);
+        }
+    }, [cubeCommand]);
 
     // 각 조각의 위치를 배치하고, 고유한 id와 sticker 부착
     const assembleCube = (pieces) => {
@@ -197,6 +188,37 @@ function Cube({
         }
     };
 
+    // 큐브 위치 변경 이벤트
+    const mousedown = (md_e) => {
+        md_e.stopPropagation();
+        const element = md_e.target.closest(".face");
+        const face = [].indexOf.call((element || cubeElem).parentNode.children, element);
+        const mousemove = (mm_e) => {
+            if (element) {
+                const event = EventUtil.getEventByDevice(viewMode, mm_e);
+                const gid = /\d/.exec(document.elementFromPoint(event.pageX, event.pageY).id);
+                if (gid?.input.includes("anchor")) {
+                    const e = element.parentNode.children[mx(face, Number(gid) + 3)].hasChildNodes();
+                    setCubeCommand([
+                        ...cubeCommand, 
+                        `${commandChar[mx(face, Number(gid) + 1 + 2 * e)]}${e ? "" : "'"}`]
+                    );
+                    mouseup();
+                }
+            }
+        };
+        const mouseup = () => {
+            container.current.appendChild(guide.current);
+            cubeElem.removeEventListener(eventType.mousemove, mousemove);
+            cubeElem.removeEventListener(eventType.mouseup, mouseup);
+            cubeElem.addEventListener(eventType.mousedown, mousedown);
+        };
+        (element || container.current).appendChild(guide.current);
+        cubeElem.addEventListener(eventType.mousemove, mousemove);
+        cubeElem.addEventListener(eventType.mouseup, mouseup);
+        cubeElem.removeEventListener(eventType.mousedown, mousedown);
+    };
+
     // 회전 애니메이션
     const animateRotation = (face, clockwise, pieceList, currentTime) => {
         const k = 0.3 * (face % 2 * 2 - 1) * (2 * clockwise - 1);
@@ -223,7 +245,7 @@ function Cube({
     };
 
     return (
-        <SCCube ref={cube} className={`cube ${action}`}>
+        <SCCube ref={cube} className={`cube`}>
             { pieces && 
                 pieces.map((props) => {
                     return (

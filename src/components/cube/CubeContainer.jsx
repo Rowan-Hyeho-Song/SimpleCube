@@ -120,7 +120,7 @@ function CubeContainer({
     }, []);
 
     useEffect(() => {
-        setCubeRotate([-35, -45]);
+        setCubeRotate([-45, -45]);
         setAction("init");
     }, [cubeType, penalty]);
 

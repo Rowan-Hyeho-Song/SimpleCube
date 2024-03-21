@@ -101,6 +101,10 @@ const ViewControl = styled.div`
     margin-bottom: 10px;
 
     .view-button {
+        -webkit-user-select:none;
+        -moz-user-select:none;
+        -ms-user-select:none;
+        user-select:none;
         position: relative;
         display: flex;
         justify-content: center;

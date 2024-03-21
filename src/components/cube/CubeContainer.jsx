@@ -31,8 +31,7 @@ const Container = styled.div`
 `;
 const SCPivot = styled.div`
     position: absolute;
-    top: 0;
-    bottom: 0;
+    top: 40vh;
     left: 0;
     right: 0;
     width: 0;
@@ -154,10 +153,10 @@ function CubeContainer({
         const targetStyle = pivotRef.current.style;
         const [x, y] = targetStyle.transform.match(/-?\d+\.?\d*/g).map(Number);
         const sign = [
-            x > -35 ? 1 : -1,
+            x > -45 ? 1 : -1,
             y > -45 ? 1 : -1,
         ];
-        const xRange = [-35, -35 + 90 * sign[0]];
+        const xRange = [-45, -45 + 90 * sign[0]];
         const yRange = [-45, -45 + 90 * sign[1]];
         const inRange = (range, value) => {
             const min = Math.min(...range);

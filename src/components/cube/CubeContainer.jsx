@@ -120,7 +120,7 @@ function CubeContainer({
     }, []);
 
     useEffect(() => {
-        setCubeRotate([-45, -45]);
+        setCubeRotate([-35, -45]);
         setAction("init");
     }, [cubeType, penalty]);
 
@@ -153,10 +153,10 @@ function CubeContainer({
         const targetStyle = pivotRef.current.style;
         const [x, y] = targetStyle.transform.match(/-?\d+\.?\d*/g).map(Number);
         const sign = [
-            x > -45 ? 1 : -1,
+            x > -35 ? 1 : -1,
             y > -45 ? 1 : -1,
         ];
-        const xRange = [-45, -45 + 90 * sign[0]];
+        const xRange = [-35, -35 + 90 * sign[0]];
         const yRange = [-45, -45 + 90 * sign[1]];
         const inRange = (range, value) => {
             const min = Math.min(...range);

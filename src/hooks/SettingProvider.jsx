@@ -77,11 +77,11 @@ export const settingMenu = [
             
         ],
     },
-    {
-        key: "customColor",
-        type: "button",
-        icon: <Icon icon="PaletteDuotone" asset="pi" />,
-    },
+    // {
+    //     key: "customColor",
+    //     type: "button",
+    //     icon: <Icon icon="PaletteDuotone" asset="pi" />,
+    // },
     {
         key: "penalty",
         type: "dropdown",
@@ -150,6 +150,7 @@ export function SettingProvider({children}) {
     });
     const [penalty, setPenalty] = useState([]);
     const [language, setLanguage] = useState(i18n.language);
+    
 
     return (
         <SettingContext.Provider value={{
@@ -180,6 +181,7 @@ export const usePenalty = () => {
     const {penalty, setPenalty } = useContext(SettingContext);
     return [penalty, setPenalty];
 }
+
 export const useLanguage = () => {
     const {language, setLanguage } = useContext(SettingContext);
     const changeLanguage = (key) => {

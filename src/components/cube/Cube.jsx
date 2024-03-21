@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 import Piece from "@components/cube/Piece";
 import { getViewMode } from "@utils/MediaQuery";
+import { useAction } from "@hooks/CubeProvider";
 import ArrayUtil from "@utils/ArrayUtil";
 import EventUtil from "@utils/EventUtil";
 
@@ -9,10 +10,6 @@ const SCCube = styled.div`
     font-size: calc(var(--cube-scale) * 100%);
     margin-top: calc(var(--cube-size) / -2);
     margin-left: calc(var(--cube-size) / -2);
-
-    &.shuffle {
-        pointer-events: none;
-    }
 `;
 
 // i번째 조각에서 j번째 인접한 조각으로 이동하기 위한 방향 반환
@@ -34,12 +31,11 @@ const getAxis = (face) => {
 
 function Cube({
     type,
-    action,
-    setAction,
     guide,
     container
 }) {
     const [pieces, setPieces] = useState([]);
+    const [action, setAction] = useAction();
     const lastestPieces = useRef(pieces);
     const cube = useRef();
     const count = type == "cube3" ? 26 : 8;
@@ -74,6 +70,7 @@ function Cube({
     const eventType = EventUtil.getEventType(viewMode);
     // Piece의 변경이 있을때마다 이벤트 재할당
     useEffect(() => {
+        // 큐브가 풀렸는지 확인
         if (action === "play") {
             const check = {
                 left: [], right: [],
@@ -93,30 +90,32 @@ function Cube({
         lastestPieces.current = pieces;
         const cubeElem = cube?.current;
         const mousedown = (md_e) => {
-            md_e.stopPropagation();
-            const element = md_e.target.closest(".face");
-            const face = [].indexOf.call((element || cubeElem).parentNode.children, element);
-            const mousemove = (mm_e) => {
-                if (element) {
-                    const event = EventUtil.getEventByDevice(viewMode, mm_e);
-                    const gid = /\d/.exec(document.elementFromPoint(event.pageX, event.pageY).id);
-                    if (gid?.input.includes("anchor")) {
-                        mouseup();
-                        const e = element.parentNode.children[mx(face, Number(gid) + 3)].hasChildNodes();
-                        animateRotation(mx(face, Number(gid) + 1 + 2 * e), e, lastestPieces.current, Date.now());
+            if (action !== "shuffle"){
+                md_e.stopPropagation();
+                const element = md_e.target.closest(".face");
+                const face = [].indexOf.call((element || cubeElem).parentNode.children, element);
+                const mousemove = (mm_e) => {
+                    if (element) {
+                        const event = EventUtil.getEventByDevice(viewMode, mm_e);
+                        const gid = /\d/.exec(document.elementFromPoint(event.pageX, event.pageY).id);
+                        if (gid?.input.includes("anchor")) {
+                            const e = element.parentNode.children[mx(face, Number(gid) + 3)].hasChildNodes();
+                            animateRotation(mx(face, Number(gid) + 1 + 2 * e), e, lastestPieces.current, Date.now());
+                            mouseup();
+                        }
                     }
-                }
-            };
-            const mouseup = () => {
-                container.current.appendChild(guide.current);
-                cubeElem.removeEventListener(eventType.mousemove, mousemove);
-                cubeElem.removeEventListener(eventType.mouseup, mouseup);
-                cubeElem.addEventListener(eventType.mousedown, mousedown);
-            };
-            (element || container.current).appendChild(guide.current);
-            cubeElem.addEventListener(eventType.mousemove, mousemove);
-            cubeElem.addEventListener(eventType.mouseup, mouseup);
-            cubeElem.removeEventListener(eventType.mousedown, mousedown);
+                };
+                const mouseup = () => {
+                    container.current.appendChild(guide.current);
+                    cubeElem.removeEventListener(eventType.mousemove, mousemove);
+                    cubeElem.removeEventListener(eventType.mouseup, mouseup);
+                    cubeElem.addEventListener(eventType.mousedown, mousedown);
+                };
+                (element || container.current).appendChild(guide.current);
+                cubeElem.addEventListener(eventType.mousemove, mousemove);
+                cubeElem.addEventListener(eventType.mouseup, mouseup);
+                cubeElem.removeEventListener(eventType.mousedown, mousedown);
+            }
         };
         cubeElem?.addEventListener(eventType.mousedown, mousedown);
         return () => {
@@ -223,7 +222,7 @@ function Cube({
     };
 
     return (
-        <SCCube ref={cube} className={`cube ${action}`}>
+        <SCCube ref={cube} className={`cube`}>
             { pieces && 
                 pieces.map((props) => {
                     return (

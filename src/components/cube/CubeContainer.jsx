@@ -2,7 +2,9 @@ import { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 import { useTranslation } from "react-i18next";
 import { getViewMode } from "@utils/MediaQuery";
-import { SettingContext, useCubeType } from "@hooks/SettingProvider";
+import { useCubeType } from "@hooks/SettingProvider";
+import { CubeProvider, useAction } from "@hooks/CubeProvider";
+import CubeController from "@components/cube/CubeController";
 import Cube from "@components/cube/Cube";
 import ConfettiExplosion from "react-confetti-explosion";
 import EventUtil from "@utils/EventUtil";
@@ -25,37 +27,6 @@ const Container = styled.div`
     div {
         position: absolute;
         transform-style: inherit;
-    }
-
-    .button-group {
-        display: flex;
-        flex-direction: column;
-        width: 300px;
-        bottom: 20%;
-        left: calc(50% - 150px);
-        font-weight: 600;
-        color: ${({theme}) => theme.menu.font};
-
-        .shuffle-or-play {
-            text-align: center;
-            width: 100%;
-            padding: 1em;
-            border-radius: 5px;
-            background-color: ${({theme}) => theme.menu.background};
-            cursor: pointer;
-            
-            @media (hover: hover) and (pointer: fine) {
-                &:hover {
-                    background-color: ${({theme}) => theme.menu.subHoverBackground};
-                }
-            }
-            &.shuffle {
-                background-color: ${({theme}) => theme.menu.selectBackground};
-            }
-            &.play {
-                display: none;
-            }
-        }
     }
 `;
 const SCPivot = styled.div`
@@ -87,28 +58,8 @@ function Pivot({
     container
 }) {
     const [cubeType] = useCubeType();
-    const [cubeAction, setCubeAction] = useState("init");
-    const { t } = useTranslation();
-
-    useEffect(() => {
-        setCubeAction("init");
-    }, [cubeType]);
-
-    const updateCubeAction = () => {
-        const actions = ["init", "shuffle", "play", "solved"];
-        const now = actions.findIndex((action) => action === cubeAction);
-        setCubeAction(actions[now + 1 == actions.length ? 0 : now + 1]);
-    };
-    const getButtonText = (action) => {
-        const text = {
-            init: "shuffle",
-            shuffle: "play",
-            play: "playing",
-            solved: "solved"
-        };
-        return text[action];
-    };
-
+    const [action] = useAction();
+    
     return (
         <>
             <SCPivot 
@@ -117,19 +68,10 @@ function Pivot({
                 ref={refer}
             >
                 <Cube 
-                    type={cubeType} 
-                    action={cubeAction} setAction={setCubeAction}
+                    type={cubeType}
                     guide={guide} container={container} />
-                {cubeAction === "solved" && <ConfettiExplosion />}
+                {action === "solved" && <ConfettiExplosion />}
             </SCPivot>
-            <div className="button-group">
-                <div 
-                    className={`shuffle-or-play ${cubeAction}`}
-                    onClick={() => updateCubeAction()}
-                >
-                    {t(`control.button.${getButtonText(cubeAction)}`)}
-                </div>
-            </div>
         </>
     );
 }
@@ -193,15 +135,18 @@ function CubeContainer({
     };
 
     return (
-        <Container 
-            className={`${cubeType}`}
-            onMouseDown={mousedown}
-            onTouchStart={mousedown}
-            ref={containerRef}
-        >
-            <Pivot id="pivot" refer={pivotRef} guide={guideRef} container={containerRef} />
-            <Guide id="guide" refer={guideRef} />
-        </Container>
+        <CubeProvider>
+            <Container 
+                className={`${cubeType}`}
+                onMouseDown={mousedown}
+                onTouchStart={mousedown}
+                ref={containerRef}
+            >
+                <Pivot id="pivot" refer={pivotRef} guide={guideRef} container={containerRef} />
+                <CubeController />
+                <Guide id="guide" refer={guideRef} />
+            </Container>
+        </CubeProvider>
     );
 }
 

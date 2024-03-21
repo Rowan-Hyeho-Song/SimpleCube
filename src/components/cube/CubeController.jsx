@@ -108,7 +108,7 @@ const ViewControl = styled.div`
         height: 5vh;
         flex: 1;
         font-size: 1.3rem;
-        color: ${({theme}) => theme.font};
+        color: ${({theme}) => theme.menu.font};
         background-color: ${({theme}) => theme.menu.background};
         cursor: pointer;
         transition: all 0.3s;

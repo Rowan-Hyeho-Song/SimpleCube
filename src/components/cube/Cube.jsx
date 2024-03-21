@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import Piece from "@components/cube/Piece";
 import { getViewMode } from "@utils/MediaQuery";
 import { useAction, useCubeCommand } from "@hooks/CubeProvider";
+import { usePenalty } from "@hooks/SettingProvider";
 import ArrayUtil from "@utils/ArrayUtil";
 import EventUtil from "@utils/EventUtil";
 

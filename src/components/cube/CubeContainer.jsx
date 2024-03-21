@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 import { useTranslation } from "react-i18next";
 import { getViewMode } from "@utils/MediaQuery";
-import { useCubeType } from "@hooks/SettingProvider";
+import { useCubeType, usePenalty } from "@hooks/SettingProvider";
 import { CubeProvider, useAction, useCubeRotate } from "@hooks/CubeProvider";
 import CubeController from "@components/cube/CubeController";
 import Cube from "@components/cube/Cube";
@@ -102,7 +102,9 @@ function Guide({
 function CubeContainer({
 }) {
     const [cubeType] = useCubeType();
+    const [penalty] = usePenalty();
     const [cubeRotate, setCubeRotate] = useCubeRotate();
+    const [action, setAction] = useAction();
     const containerRef = useRef();
     const pivotRef = useRef();
     const guideRef = useRef();
@@ -117,9 +119,11 @@ function CubeContainer({
             document.ondragstart = null;
         }
     }, []);
+
     useEffect(() => {
         setCubeRotate([-35, -45]);
-    }, [cubeType]);
+        setAction("init");
+    }, [cubeType, penalty]);
 
     const mousedown = (md_e) => {
         const md_event = EventUtil.getEventByDevice(viewMode, md_e);

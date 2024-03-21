@@ -40,6 +40,9 @@ function CubeController() {
 
     useEffect(() => {
         setAction("init");
+    }, []);
+    useEffect(() => {
+        setAction("init");
     }, [cubeType]);
 
     const updateCubeAction = () => {

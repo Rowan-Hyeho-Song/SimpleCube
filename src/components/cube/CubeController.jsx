@@ -9,7 +9,7 @@ const Container = styled.div`
     display: flex;
     flex-direction: column;
     width: 300px;
-    bottom: 23%;
+    bottom: 30vh;
     left: calc(50% - 150px);
     font-weight: 600;
     color: ${({theme}) => theme.menu.font};
@@ -142,7 +142,7 @@ function CubeViewControl() {
         if (direction == "up") {
             setCubeRotate([cubeRotate[0] + 90, cubeRotate[1]]);
         } else {
-            const sign = Math.floor((cubeRotate[0] + 35) / 180) % 2 == 0 ? 1 : -1;
+            const sign = Math.floor((cubeRotate[0] + 45) / 180) % 2 == 0 ? 1 : -1;
             const direct = direction == "left" ? -1 : 1;
             setCubeRotate([cubeRotate[0], cubeRotate[1] + (90 * sign * direct)]);
         }

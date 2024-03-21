@@ -77,6 +77,13 @@ const SCPiece = styled.div`
             }
         }
     }
+
+    @keyframes pulseAnimate {
+        100% {
+            opacity: 0;
+            transform: translateZ(2px) scale(1);
+        }
+    }
 `;
 
 function Piece({

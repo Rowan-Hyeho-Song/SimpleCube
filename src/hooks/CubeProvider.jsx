@@ -3,7 +3,7 @@ import { useState, useContext, createContext } from "react";
 export const CubeContext = createContext({});
 export function CubeProvider({children}) {
     const [action, setAction] = useState("init");
-    const [cubeRotate, setCubeRotate] = useState([-35, -45]);
+    const [cubeRotate, setCubeRotate] = useState([-45, -45]);
     const [cubeCommand, setCubeCommand] = useState([]);
 
     return (

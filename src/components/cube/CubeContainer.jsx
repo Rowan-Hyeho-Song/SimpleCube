@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 import { useTranslation } from "react-i18next";
 import { getViewMode } from "@utils/MediaQuery";
-import { useCubeType, usePenalty } from "@hooks/SettingProvider";
+import { useMode, useCubeType, usePenalty } from "@hooks/SettingProvider";
 import { CubeProvider, useAction, useCubeRotate, useCommandMapping } from "@hooks/CubeProvider";
 import Timer from "@components/common/Timer";
 import CubeController from "@components/cube/CubeController";
@@ -65,6 +65,7 @@ function Pivot({
     guide,
     container
 }) {
+    const [mode] = useMode();
     const [cubeType] = useCubeType();
     const [penalty] = usePenalty();
     const [action, setAction] = useAction();
@@ -102,10 +103,12 @@ function Pivot({
     
     return (
         <>
-            <Timer className="timer"
-                type={timerType} start={startTime}
-                active={timerActive} setActive={setTimerActive} 
-                interval={10} />
+            {mode === "play" &&
+                <Timer className="timer"
+                    type={timerType} start={startTime}
+                    active={timerActive} setActive={setTimerActive} 
+                    interval={10} />
+            }
             <SCPivot 
                 id={id} 
                 style={{transform: `rotateX(${cubeRotate[0]}deg) rotateY(${cubeRotate[1]}deg)`}} 

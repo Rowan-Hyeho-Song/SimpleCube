@@ -21,6 +21,10 @@ const Container = styled.div`
         border-radius: 5px;
         background-color: ${({theme}) => theme.menu.background};
         cursor: pointer;
+        -webkit-user-select:none;
+        -moz-user-select:none;
+        -ms-user-select:none;
+        user-select:none;
         
         @media (hover: hover) and (pointer: fine) {
             &:hover {
@@ -29,6 +33,10 @@ const Container = styled.div`
         }
         &.shuffle {
             background-color: ${({theme}) => theme.menu.selectBackground};
+        }
+
+        &.failed {
+            background-color: ${({theme}) => theme.failedColor};
         }
     }
 `;
@@ -61,7 +69,8 @@ function CubeController() {
             init: "shuffle",
             shuffle: "play",
             play: "playing",
-            solved: "solved"
+            solved: "solved",
+            failed: "retry"
         };
         return text[act];
     };
@@ -101,10 +110,6 @@ const ViewControl = styled.div`
     margin-bottom: 10px;
 
     .view-button {
-        -webkit-user-select:none;
-        -moz-user-select:none;
-        -ms-user-select:none;
-        user-select:none;
         position: relative;
         display: flex;
         justify-content: center;
@@ -116,6 +121,10 @@ const ViewControl = styled.div`
         background-color: ${({theme}) => theme.menu.background};
         cursor: pointer;
         transition: all 0.3s;
+        -webkit-user-select:none;
+        -moz-user-select:none;
+        -ms-user-select:none;
+        user-select:none;
 
         @media (hover: hover) and (pointer: fine) {
             &:hover {

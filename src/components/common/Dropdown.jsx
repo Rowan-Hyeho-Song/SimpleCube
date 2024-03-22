@@ -78,6 +78,42 @@ const Container = styled.div`
                 }
             }
         }
+
+        .timeLimit {
+            font-size: 0;
+    
+            > svg {
+                font-size: calc(var(--button-size) * 0.7);
+            }
+    
+            &.limit-3m::after {    
+                content: "3m";
+                position: absolute;
+                font-size: 1rem;
+                top: 0px;
+                transform: translate(-1.5rem, 1.3rem);
+                font-weight: 700;
+                color: red;
+            }
+            &.limit-1m::after {    
+                content: "1m";
+                position: absolute;
+                font-size: 1rem;
+                top: 0px;
+                transform: translate(-1.5rem, 1.3rem);
+                font-weight: 700;
+                color: red;
+            }
+            &.limit-30s::after {    
+                content: "30s";
+                position: absolute;
+                font-size: 1rem;
+                top: 0px;
+                transform: translate(-1.5rem, 1.3rem);
+                font-weight: 700;
+                color: red;
+            }
+        }
     }
 `;
 
@@ -92,8 +128,8 @@ function Dropdown({
         theme: useTheme(),
         mode: useMode(),
         cubeType: useCubeType(),
-        customColor: useCustomColor(),
         penalty: usePenalty(),
+        customColor: useCustomColor(),
         language: useLanguage()
     };
     const ref = useRef();

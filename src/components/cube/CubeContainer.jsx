@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { getViewMode } from "@utils/MediaQuery";
 import { useCubeType, usePenalty } from "@hooks/SettingProvider";
 import { CubeProvider, useAction, useCubeRotate } from "@hooks/CubeProvider";
+import Timer from "@components/common/Timer";
 import CubeController from "@components/cube/CubeController";
 import Cube from "@components/cube/Cube";
 import ConfettiExplosion from "react-confetti-explosion";
@@ -22,6 +23,14 @@ const Container = styled.div`
     &.cube3 {
         --cube-size: 2em;
         --cube-scale: 2;
+    }
+
+    .timer {
+        position: absolute;
+        top: 5vh;
+        left: 0;
+        right: 0;
+        margin: auto;
     }
 
     div {
@@ -57,11 +66,46 @@ function Pivot({
     container
 }) {
     const [cubeType] = useCubeType();
-    const [action] = useAction();
+    const [penalty] = usePenalty();
+    const [action, setAction] = useAction();
     const [cubeRotate] = useCubeRotate();
+    const [timerActive, setTimerActive] = useState(false);
+    const [startTime, setStartTime] = useState(0);
+    const [timerType, setTimerType] = useState("stopwatch");
+
+    useEffect(() => {
+        if (action === "play") {
+            setTimerActive(true);
+        } else if (action === "solved") {
+            setTimerActive(false);
+        }
+    }, [action]);
+
+    useEffect(() => {
+        setTimerActive(false);
+        const timeLimit = penalty.find((v) => `${v}`.indexOf("timeLimit") > -1);
+        if (timeLimit) {
+            setTimerType("timer");
+            setStartTime(Number(timeLimit.split("-")[1]))
+        } else {
+            setTimerType("stopwatch");
+            setStartTime(0);
+        }
+
+    }, [penalty, cubeType]);
+
+    useEffect(() => {
+        if (timerActive === "timeout") {
+            setAction("failed");
+        }
+    }, [timerActive]);
     
     return (
         <>
+            <Timer className="timer"
+                type={timerType} start={startTime}
+                active={timerActive} setActive={setTimerActive} 
+                interval={10} />
             <SCPivot 
                 id={id} 
                 style={{transform: `rotateX(${cubeRotate[0]}deg) rotateY(${cubeRotate[1]}deg)`}} 

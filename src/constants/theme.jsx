@@ -3,6 +3,7 @@ export const dark = {
     font: "#ffffff",
     checkedColor: "#2255dd",
     checkedFont: "#ffffff",
+    failedColor: "#e63737",
     menu: {
         background: "#161616",
         activeBackground: "#a4a4a4",
@@ -28,6 +29,7 @@ export const light = {
     font: "#2a2a2a",
     checkedColor: "#2255dd",
     checkedFont: "#ffffff",
+    failedColor: "#e63737",
     menu: {
         background: "#2a2a2a",
         activeBackground: "#ffffff", 

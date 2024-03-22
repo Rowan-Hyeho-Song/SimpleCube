@@ -49,7 +49,7 @@ export const useCommandMapping = () => {
         const yMove = (y + 45) / 90;
         const fn = yMove < 0 ? ["shift", "push"] : ["pop", "unshift"];
         for(let i = 0; i < yMove; i++) {
-            const temp = ySide[fn[0]];
+            const temp = ySide[fn[0]]();
             ySide[fn[1]](temp);
         }
         if (xMove % 2 === 1) {
@@ -64,6 +64,7 @@ export const useCommandMapping = () => {
             B: ySide[2],
             L: ySide[3],
         });
+        console.log(...xSide, ...ySide);
     };
     return [commandMapping, changeCommandMapping];
 }

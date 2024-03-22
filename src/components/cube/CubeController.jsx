@@ -1,7 +1,7 @@
 import { useState, useEffect} from "react";
 import styled from "styled-components";
 import { useTranslation } from "react-i18next";
-import { useAction, useCubeRotate, useCubeCommand } from "@hooks/CubeProvider";
+import { useAction, useCubeRotate, useCubeCommand, useCommandMapping } from "@hooks/CubeProvider";
 import { useMode, useCubeType } from "@hooks/SettingProvider";
 import Icon from "@components/common/Icon";
 
@@ -21,6 +21,10 @@ const Container = styled.div`
         border-radius: 5px;
         background-color: ${({theme}) => theme.menu.background};
         cursor: pointer;
+        -webkit-user-select:none;
+        -moz-user-select:none;
+        -ms-user-select:none;
+        user-select:none;
         
         @media (hover: hover) and (pointer: fine) {
             &:hover {
@@ -29,6 +33,10 @@ const Container = styled.div`
         }
         &.shuffle {
             background-color: ${({theme}) => theme.menu.selectBackground};
+        }
+
+        &.failed {
+            background-color: ${({theme}) => theme.failedColor};
         }
     }
 `;
@@ -61,7 +69,8 @@ function CubeController() {
             init: "shuffle",
             shuffle: "play",
             play: "playing",
-            solved: "solved"
+            solved: "solved",
+            failed: "retry"
         };
         return text[act];
     };
@@ -112,6 +121,10 @@ const ViewControl = styled.div`
         background-color: ${({theme}) => theme.menu.background};
         cursor: pointer;
         transition: all 0.3s;
+        -webkit-user-select:none;
+        -moz-user-select:none;
+        -ms-user-select:none;
+        user-select:none;
 
         @media (hover: hover) and (pointer: fine) {
             &:hover {
@@ -138,24 +151,28 @@ const ViewControl = styled.div`
 
 function CubeViewControl() {
     const [cubeRotate, setCubeRotate] = useCubeRotate();
+    const [commandMapping, setCommandMapping] = useCommandMapping();
     const rotateCube = (direction) => {
+        let [x, y] = cubeRotate;
         if (direction == "up") {
-            setCubeRotate([cubeRotate[0] + 90, cubeRotate[1]]);
+            x += 180;
         } else {
             const sign = Math.floor((cubeRotate[0] + 45) / 180) % 2 == 0 ? 1 : -1;
             const direct = direction == "left" ? -1 : 1;
-            setCubeRotate([cubeRotate[0], cubeRotate[1] + (90 * sign * direct)]);
+            y += 90 * sign * direct;
         }
+        setCubeRotate([x, y]);
+        setCommandMapping([x, y]);
     }
     return (
         <ViewControl>
-            <div className={`view-button turn-left`} onClick={() =>rotateCube("left")}>
+            <div className={`view-button turn-left`} onClick={() => rotateCube("left")}>
                 <Icon asset="tb" icon="ArrowBigLeftFilled" />
             </div>
-            <div className={`view-button turn-up`} onClick={() =>rotateCube("up")}>
+            <div className={`view-button turn-up`} onClick={() => rotateCube("up")}>
                 <Icon asset="tb" icon="ArrowBigUpLineFilled" />
             </div>
-            <div className={`view-button turn-right`} onClick={() =>rotateCube("right")}>
+            <div className={`view-button turn-right`} onClick={() => rotateCube("right")}>
                 <Icon asset="tb" icon="ArrowBigRightFilled" />
             </div>
         </ViewControl>
@@ -164,6 +181,7 @@ function CubeViewControl() {
 
 function CubeSwapControl() {
     const [cubeCommand, setCubeCommand] = useCubeCommand();
+    const [commandMapping] = useCommandMapping();
     const cmds = ["U", "D", "L", "R", "F", "B"];
     const appendCommand = (value) => {
         setCubeCommand([...cubeCommand, value]);
@@ -179,7 +197,7 @@ function CubeSwapControl() {
                                 <div 
                                     key={`cmd-btn-${cmd}${clockwise == "" ? "" : "-reverse"}`} 
                                     className={`view-button`}
-                                    onClick={() => appendCommand(word)}
+                                    onClick={() => appendCommand(`${commandMapping[cmd]}${clockwise}`)}
                                 >
                                     {word}
                                 </div>

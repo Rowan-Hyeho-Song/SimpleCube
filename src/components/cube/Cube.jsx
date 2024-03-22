@@ -94,7 +94,7 @@ function Cube({
         } else {
             // 셔플 중인 상태에서는 큐브 위치 변경이 안되도록 이벤트 할당 제한
             lastestPieces.current = pieces;
-            if (action !== "shuffle") {
+            if (!["shuffle", "failed"].includes(action)) {
                 cubeElem?.addEventListener(eventType.mousedown, mousedown);
             }
             return () => {

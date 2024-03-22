@@ -103,10 +103,22 @@ export const settingMenu = [
                         icon: <Icon className="countLimit" icon="HexagonNumber0" asset="tb" />, 
                     },
                     { 
-                        key: "timeLimit",
+                        key: "timeLimit-180000",
                         type: "icon",
-                        value: "timeLimit", 
-                        icon: <Icon className="timeLimit" icon="ClockCountdownDuotone" asset="pi" />,
+                        value: "timeLimit-180000", 
+                        icon: <div className="timeLimit limit-3m"><Icon icon="ClockCountdownDuotone" asset="pi" /></div>,
+                    },
+                    { 
+                        key: "timeLimit-60000",
+                        type: "icon",
+                        value: "timeLimit-60000", 
+                        icon: <div className="timeLimit limit-1m"><Icon className="timeLimit-1m" icon="ClockCountdownDuotone" asset="pi" /></div>,
+                    },
+                    { 
+                        key: "timeLimit-30000",
+                        type: "icon",
+                        value: "timeLimit-30000", 
+                        icon: <div className="timeLimit limit-30s"><Icon className="timeLimit-30s" icon="ClockCountdownDuotone" asset="pi" /></div>,
                     },
                 ]
             },
@@ -200,7 +212,16 @@ export const useCustomColor = () => {
 export const usePenalty = () => {
     const {penalty, setPenalty } = useContext(SettingContext);
     const setPenaltyLocalStorage = (value) => {
-        setPenalty(value);
+        setPenalty((prev) => {
+            // 시간 제한 값의 경우 하나만 존재해야함
+            const filtered = value.filter((v) => `${v}`.indexOf("timeLimit") > -1);
+            if (filtered.length > 1) {
+                const beforeTimeLimit = prev.find((v) => `${v}`.indexOf("timeLimit") > -1);
+                const idx = value.findIndex((v) => v === beforeTimeLimit);
+                value.splice(idx, 1);
+            }
+            return value;
+        });
         window.localStorage.setItem("penalty", JSON.stringify(value));
     };
     return [penalty, setPenaltyLocalStorage];

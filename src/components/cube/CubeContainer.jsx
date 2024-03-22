@@ -3,7 +3,8 @@ import styled from "styled-components";
 import { useTranslation } from "react-i18next";
 import { getViewMode } from "@utils/MediaQuery";
 import { useCubeType, usePenalty } from "@hooks/SettingProvider";
-import { CubeProvider, useAction, useCubeRotate } from "@hooks/CubeProvider";
+import { CubeProvider, useAction, useCubeRotate, useCommandMapping } from "@hooks/CubeProvider";
+import Timer from "@components/common/Timer";
 import CubeController from "@components/cube/CubeController";
 import Cube from "@components/cube/Cube";
 import ConfettiExplosion from "react-confetti-explosion";
@@ -22,6 +23,14 @@ const Container = styled.div`
     &.cube3 {
         --cube-size: 2em;
         --cube-scale: 2;
+    }
+
+    .timer {
+        position: absolute;
+        top: 5vh;
+        left: 0;
+        right: 0;
+        margin: auto;
     }
 
     div {
@@ -57,11 +66,46 @@ function Pivot({
     container
 }) {
     const [cubeType] = useCubeType();
-    const [action] = useAction();
+    const [penalty] = usePenalty();
+    const [action, setAction] = useAction();
     const [cubeRotate] = useCubeRotate();
+    const [timerActive, setTimerActive] = useState(false);
+    const [startTime, setStartTime] = useState(0);
+    const [timerType, setTimerType] = useState("stopwatch");
+
+    useEffect(() => {
+        if (action === "play") {
+            setTimerActive(true);
+        } else if (action === "solved") {
+            setTimerActive(false);
+        }
+    }, [action]);
+
+    useEffect(() => {
+        setTimerActive(false);
+        const timeLimit = penalty.find((v) => `${v}`.indexOf("timeLimit") > -1);
+        if (timeLimit) {
+            setTimerType("timer");
+            setStartTime(Number(timeLimit.split("-")[1]))
+        } else {
+            setTimerType("stopwatch");
+            setStartTime(0);
+        }
+
+    }, [penalty, cubeType]);
+
+    useEffect(() => {
+        if (timerActive === "timeout") {
+            setAction("failed");
+        }
+    }, [timerActive]);
     
     return (
         <>
+            <Timer className="timer"
+                type={timerType} start={startTime}
+                active={timerActive} setActive={setTimerActive} 
+                interval={10} />
             <SCPivot 
                 id={id} 
                 style={{transform: `rotateX(${cubeRotate[0]}deg) rotateY(${cubeRotate[1]}deg)`}} 
@@ -103,6 +147,7 @@ function CubeContainer({
     const [cubeType] = useCubeType();
     const [penalty] = usePenalty();
     const [cubeRotate, setCubeRotate] = useCubeRotate();
+    const [commandMapping, setCommandMapping] = useCommandMapping();
     const [action, setAction] = useAction();
     const containerRef = useRef();
     const pivotRef = useRef();
@@ -121,6 +166,7 @@ function CubeContainer({
 
     useEffect(() => {
         setCubeRotate([-35, -45]);
+        setCommandMapping([-35, -45]);
         setAction("init");
     }, [cubeType, penalty]);
 
@@ -144,29 +190,30 @@ function CubeContainer({
         container.addEventListener(eventType.mouseup, mouseup);
     };
 
-    const rotateCube = (dx, dy, baseX = null, baseY = null) => {
+    const rotateCube = (dx, dy, baseX = null, baseY = null, fromBalanced = false) => {
         const x = baseX != null ? baseX : cubeRotate[0];
         const y = baseY != null ? baseY : cubeRotate[1];
         setCubeRotate([x - dx, y + dy]);
+        fromBalanced && setCommandMapping([x - dx, y + dy]);
     };
     const strikeBalance = () => {
         const targetStyle = pivotRef.current.style;
         const [x, y] = targetStyle.transform.match(/-?\d+\.?\d*/g).map(Number);
         const sign = [
-            x > -45 ? 1 : -1,
+            x > -35 ? 1 : -1,
             y > -45 ? 1 : -1,
         ];
-        const xRange = [-45, -45 + 90 * sign[0]];
+        const xRange = [-35, -35 + 180 * sign[0]];
         const yRange = [-45, -45 + 90 * sign[1]];
         const inRange = (range, value) => {
             const min = Math.min(...range);
             const max = Math.max(...range);
-            return min <= value && max >= value;
+            return min < value && max >= value;
         };
         while(!(inRange(xRange, x) && inRange(yRange, y))) {
             if (!inRange(xRange, x)) {
-                xRange[0] += 90 * sign[0];
-                xRange[1] += 90 * sign[0];
+                xRange[0] += 180 * sign[0];
+                xRange[1] += 180 * sign[0];
             }
             if (!inRange(yRange, y)) {
                 yRange[0] += 90 * sign[1];
@@ -175,7 +222,7 @@ function CubeContainer({
         }
         const targetX = Math.abs(xRange[0] - x) > Math.abs(xRange[1] - x) ? xRange[1] : xRange[0];
         const targetY = Math.abs(yRange[0] - y) > Math.abs(yRange[1] - y) ? yRange[1] : yRange[0];
-        rotateCube(-targetX, targetY, 0, 0);
+        rotateCube(-targetX, targetY, 0, 0, true);
     };
 
     return (

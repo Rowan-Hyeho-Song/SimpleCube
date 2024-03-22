@@ -94,7 +94,6 @@ const Container = styled.div`
             }
         }
     }
-
 `;
 
 function SettingBar() {

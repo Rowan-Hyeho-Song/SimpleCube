@@ -29,7 +29,17 @@
             "play": "게임 시작",
             "playing": "게임 중...",
             "solved": "한번 더?",
-            "retry": "다시 하기"
-        }
+            "retry": "다시 하기",
+            "reset": "초기화"
+        },
+        "colors": {
+            "red": "빨간색",
+            "green": "초록색",
+            "white": "흰색",
+            "yellow": "노란색",
+            "blue": "파란색",
+            "orange": "주황색"
+        },
+        "colorGuide": "<span>{{color}}</span> 필드 추가"
     }
 }

@@ -1,7 +1,7 @@
 import { useState, useEffect} from "react";
 import styled from "styled-components";
-import { useTranslation } from "react-i18next";
-import { useAction, useCubeRotate, useCubeCommand, useCommandMapping } from "@hooks/CubeProvider";
+import { useTranslation, Trans } from "react-i18next";
+import { useAction, useCubeRotate, useCubeCommand, useCommandMapping, useSelectedColor } from "@hooks/CubeProvider";
 import { useMode, useCubeType } from "@hooks/SettingProvider";
 import Icon from "@components/common/Icon";
 
@@ -14,6 +14,13 @@ const Container = styled.div`
     font-weight: 600;
     color: ${({theme}) => theme.menu.font};
 
+    & * {
+        -webkit-user-select:none;
+        -moz-user-select:none;
+        -ms-user-select:none;
+        user-select:none;
+    }
+
     .main-button {
         text-align: center;
         width: 100%;
@@ -21,10 +28,6 @@ const Container = styled.div`
         border-radius: 5px;
         background-color: ${({theme}) => theme.menu.background};
         cursor: pointer;
-        -webkit-user-select:none;
-        -moz-user-select:none;
-        -ms-user-select:none;
-        user-select:none;
         
         @media (hover: hover) and (pointer: fine) {
             &:hover {
@@ -44,12 +47,31 @@ const ControlBox = styled.div`
     display: flex;
     flex-direction: column;
     width: 300px;
+
+    .reset-button {
+        position: relative !important;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        width: 100%;
+        padding: 0.5em;
+        border-radius: 5px;
+        cursor: pointer;
+        background-color: ${({theme}) => theme.failedColor};
+
+        > svg {
+            font-size: 1.2rem;
+            margin-right: 0.5rem;
+        }
+    }
 `;
 
 function CubeController() {
     const [cubeType] = useCubeType();
     const [mode] = useMode();
     const [action, setAction] = useAction();
+    const [selectedColor, updateSelectedColor] = useSelectedColor();
     const { t } = useTranslation();
 
     useEffect(() => {
@@ -59,11 +81,16 @@ function CubeController() {
         setAction("init");
     }, [cubeType]);
 
-    const updateCubeAction = () => {
+    const updateCubeAction = (act = null) => {
         const actions = ["init", "shuffle", "play", "solved"];
         const now = actions.findIndex((act) => act === action);
-        setAction(actions[now + 1 == actions.length ? 0 : now + 1]);
+        const nowAct = act || actions[now + 1 == actions.length ? 0 : now + 1];
+        setAction(nowAct);
     };
+    const resetCubeState = () => {
+        updateSelectedColor("red");
+        updateCubeAction("init");
+    }
     const getMainButtonText = (act) => {
         const text = {
             init: "shuffle",
@@ -83,7 +110,7 @@ function CubeController() {
                         { action !== "play" ? (
                             <div 
                                 className={`main-button ${action}`}
-                                onClick={updateCubeAction}
+                                onClick={() => updateCubeAction()}
                             >
                                 {t(`control.button.${getMainButtonText(action)}`)}
                             </div>
@@ -96,6 +123,17 @@ function CubeController() {
                     </>
                 ) : (
                     <>
+                        <ControlBox>
+                            <CubeViewControl />
+                            <div 
+                                className={`reset-button`}
+                                onClick={() => resetCubeState()}
+                            >
+                                <Icon icon="ArrowClockwiseBold" asset="pi" />
+                                {t(`control.button.reset`)}
+                            </div>
+                            <ColorGuide />
+                        </ControlBox>
                     </>
                 )
             }
@@ -121,10 +159,6 @@ const ViewControl = styled.div`
         background-color: ${({theme}) => theme.menu.background};
         cursor: pointer;
         transition: all 0.3s;
-        -webkit-user-select:none;
-        -moz-user-select:none;
-        -ms-user-select:none;
-        user-select:none;
 
         @media (hover: hover) and (pointer: fine) {
             &:hover {
@@ -208,6 +242,62 @@ function CubeSwapControl() {
             })}
         </ViewControl>
     );
+}
+
+const SCColorGuide = styled.div`
+    top: -60vh;
+    width: 100%;
+    text-align: center;
+    color: ${({theme}) => theme.font};
+    
+    font-size: 1.3rem;
+
+    span {
+        padding: 0.2rem;
+        border-radius: 5px;
+        &.red {
+            color: ${({theme}) => theme.menu.font};
+            background-color: ${({theme}) => theme.faceColor.red};
+        }
+        &.green {
+            color: #2a2a2a;
+            background-color: ${({theme}) => theme.faceColor.green};
+        }
+        &.white {
+            color: #2a2a2a;
+            background-color: ${({theme}) => theme.faceColor.white};
+        }
+        &.yellow {
+            color: #2a2a2a;
+            background-color: ${({theme}) => theme.faceColor.yellow};
+        }
+        &.blue {
+            color: ${({theme}) => theme.menu.font};
+            background-color: ${({theme}) => theme.faceColor.blue};
+        }
+        &.orange {
+            color: ${({theme}) => theme.menu.font};
+            background-color: ${({theme}) => theme.faceColor.orange};
+        }
+    }
+`;
+
+function ColorGuide() {
+    const [selectedColor, updateSelectedColor] = useSelectedColor();
+    const { t } = useTranslation();
+    return (
+        <SCColorGuide>
+            {selectedColor !== "finish" && (
+                <Trans 
+                    i18nKey="control.colorGuide" 
+                    values={{ color: t(`control.colors.${selectedColor}`)}}
+                    components={{ span: <span className={selectedColor}></span>}}
+                >
+                    Add <span>{{selectedColor}}</span> fields
+                </Trans>
+            )}
+        </SCColorGuide>
+    )
 }
 
 export default CubeController;

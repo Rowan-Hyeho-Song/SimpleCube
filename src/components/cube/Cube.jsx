@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import styled, { css } from "styled-components";
 import Piece from "@components/cube/Piece";
 import { getViewMode } from "@utils/MediaQuery";
-import { useAction, useCubeCommand } from "@hooks/CubeProvider";
-import { usePenalty } from "@hooks/SettingProvider";
+import { useAction, useCubeCommand, useSelectedColor } from "@hooks/CubeProvider";
+import { useMode } from "@hooks/SettingProvider";
 import ArrayUtil from "@utils/ArrayUtil";
 import EventUtil from "@utils/EventUtil";
 
@@ -35,9 +35,11 @@ function Cube({
     guide,
     container
 }) {
+    const [mode] = useMode();
     const [pieces, setPieces] = useState([]);
     const [action, setAction] = useAction();
     const [cubeCommand, setCubeCommand] = useCubeCommand();
+    const [selectedColor, updateSelectedColor] = useSelectedColor();
     const lastestPieces = useRef(pieces);
     const cube = useRef();
     const count = type == "cube3" ? 26 : 8;
@@ -66,39 +68,35 @@ function Cube({
                     style: {} 
                 };
             });
-            assembleCube(newPieces);
+            assembleCube(newPieces, mode === "play");
             updatePieces(newPieces);
         };
         if (action == "init") {
             initCube();
         }
-    }, [type, action]);
+    }, [type, action, mode]);
 
     // Piece의 변경이 있을때
     useEffect(() => {
+        lastestPieces.current = pieces;
+        
         // 큐브가 정답인지 확인
         if (action === "play") {
-            const check = {
-                left: [], right: [],
-                top: [], bottom: [],
-                back: [], front: []
-            };
-            pieces.forEach((piece) => {
-                faces.forEach((face) => {
-                    const color = piece.stickers[face];
-                    color && check[face].push(color);
-                });
-            });
-            const isSolved = Object.values(check).every((arr) => new Set(arr).size === 1);
+            const stickers = getCurrentStickerState();
+            const isSolved = Object.values(stickers).every((arr) => new Set(arr).size === 1);
             isSolved && setAction("solved");
         } else {
             // 셔플 중인 상태에서는 큐브 위치 변경이 안되도록 이벤트 할당 제한
-            lastestPieces.current = pieces;
             if (!["shuffle", "failed"].includes(action)) {
-                cubeElem?.addEventListener(eventType.mousedown, mousedown);
+                if (mode === "play") {
+                    cubeElem?.addEventListener(eventType.mousedown, selectMovePiece);
+                } else {
+                    cubeElem?.addEventListener(eventType.mousedown, selectPieceColor);
+                }
             }
             return () => {
-                cubeElem?.removeEventListener(eventType.mousedown, mousedown);
+                cubeElem?.removeEventListener(eventType.mousedown, selectMovePiece);
+                cubeElem?.removeEventListener(eventType.mousedown, selectPieceColor);
             };
         }
     }, [pieces]);
@@ -107,7 +105,7 @@ function Cube({
         if (action == "shuffle") {
             shuffleCube();
         } else if (action == "play") {
-            cubeElem?.addEventListener(eventType.mousedown, mousedown);
+            cubeElem?.addEventListener(eventType.mousedown, selectMovePiece);
         }
     }, [action]);
 
@@ -121,12 +119,28 @@ function Cube({
         }
     }, [cubeCommand]);
 
+    // 현재 piece들의 sticker 상태 반환
+    const getCurrentStickerState = () => {
+        const stickers = {
+            left: [], right: [],
+            top: [], bottom: [],
+            back: [], front: []
+        };
+        lastestPieces.current.forEach((piece) => {
+            faces.forEach((face) => {
+                const color = piece.stickers[face];
+                color && stickers[face].push(color);
+            });
+        });
+        return stickers;
+    }
+
     // 각 조각의 위치를 배치하고, 고유한 id와 sticker 부착
-    const assembleCube = (pieces) => {
+    const assembleCube = (pieces, fillColor = false) => {
         // 움직임을 지정할때마다 id값에 변화를 줘서 특정 조건으로 id를 찾을 수 있게 적용
         const moveTo = (face) => {
             id = id + (1 << face);
-            pieces[i].stickers[faces[face]] = colors[face];
+            pieces[i].stickers[faces[face]] = fillColor ? colors[face] : "empty";
 
             const val = type === "cube2" ? 1.5 : 2;
             return `translate${getAxis(face)}(${face % 2 === 0 ? -val : val}em) `;
@@ -142,6 +156,11 @@ function Cube({
                 pieces[i].style.transform = "rotateX(0deg) " + moveTo(i % 6) + moveTo(x) + moveTo(mx(x, x + 2));
             }
             pieces[i].id = `piece${id}`;
+        }
+        
+        if (!fillColor) {
+            setAction("selectColor");
+            updateSelectedColor("red");
         }
     };
 
@@ -189,11 +208,11 @@ function Cube({
     };
 
     // 큐브 위치 변경 이벤트
-    const mousedown = (md_e) => {
+    const selectMovePiece = (md_e) => {
         md_e.stopPropagation();
         const element = md_e.target.closest(".face");
         const face = [].indexOf.call((element || cubeElem).parentNode.children, element);
-        const mousemove = (mm_e) => {
+        const setDirection = (mm_e) => {
             if (element) {
                 const event = EventUtil.getEventByDevice(viewMode, mm_e);
                 const gid = /\d/.exec(document.elementFromPoint(event.pageX, event.pageY).id);
@@ -203,21 +222,45 @@ function Cube({
                         ...cubeCommand, 
                         `${commandChar[mx(face, Number(gid) + 1 + 2 * e)]}${e ? "" : "'"}`]
                     );
-                    mouseup();
+                    applyMovement();
                 }
             }
         };
-        const mouseup = () => {
+        const applyMovement = () => {
             container.current.appendChild(guide.current);
-            cubeElem.removeEventListener(eventType.mousemove, mousemove);
-            cubeElem.removeEventListener(eventType.mouseup, mouseup);
-            cubeElem.addEventListener(eventType.mousedown, mousedown);
+            cubeElem.removeEventListener(eventType.mousemove, setDirection);
+            cubeElem.removeEventListener(eventType.mouseup, applyMovement);
+            cubeElem.addEventListener(eventType.mousedown, selectMovePiece);
         };
         (element || container.current).appendChild(guide.current);
-        cubeElem.addEventListener(eventType.mousemove, mousemove);
-        cubeElem.addEventListener(eventType.mouseup, mouseup);
-        cubeElem.removeEventListener(eventType.mousedown, mousedown);
+        cubeElem.addEventListener(eventType.mousemove, setDirection);
+        cubeElem.addEventListener(eventType.mouseup, applyMovement);
+        cubeElem.removeEventListener(eventType.mousedown, selectMovePiece);
     };
+
+    // 풀이 모드에서 조각의 색상 선택 이벤트
+    const selectPieceColor = (md_e) => {
+        md_e.stopPropagation();
+        const element = md_e.target.closest(".face");
+        const face = [].indexOf.call((element || cubeElem).parentNode.children, element);
+        
+        if (element) {
+            const id = element.parentNode.id;
+            const index = pieces.findIndex((piece) => piece.id === id);
+            const piecesList = lastestPieces.current;
+
+            if (piecesList[index].stickers[faces[face]] === "empty") {
+                const stickers = getCurrentStickerState();
+                const count = type === "cube3" ? 9 : 4;
+                const filteredCurrentColor = Object.values(stickers).flat().filter((v) => v === selectedColor);
+                if (filteredCurrentColor.length === count - 1) {
+                    updateSelectedColor();
+                }
+                piecesList[index].stickers[faces[face]] = selectedColor;
+                setPieces([...piecesList]);
+            }
+        }
+    }
 
     // 회전 애니메이션
     const animateRotation = (face, clockwise, pieceList, currentTime) => {

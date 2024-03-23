@@ -29,7 +29,17 @@
             "play": "Start Play",
             "playing": "Playing...",
             "solved": "One More Play?",
-            "retry": "Retry"
-        }
+            "retry": "Retry",
+            "reset": "Reset"
+        },
+        "colors": {
+            "red": "Red",
+            "green": "Green",
+            "white": "White",
+            "yellow": "Yellow",
+            "blue": "Blue",
+            "orange": "Orange"
+        },
+        "colorGuide": "Add <span>{{color}}</span> fields"
     }
 }

@@ -58,6 +58,17 @@ const SCPiece = styled.div`
                 });
             }}
 
+            &.empty {
+                background-image: 
+                    linear-gradient(45deg, #808080 25%, transparent 25%), 
+                    linear-gradient(-45deg, #808080 25%, transparent 25%), 
+                    linear-gradient(45deg, transparent 75%, #808080 75%), 
+                    linear-gradient(-45deg, transparent 75%, #808080 75%);
+                background-size: 20px 20px;
+                background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+                cursor: pointer;
+            }
+
             &.blind {
                 > div {
                     width: 100%;
@@ -108,7 +119,7 @@ function Piece({
         return cls;
     }
     return (
-        <SCPiece id={id} className={getCubeTypeClass()} 
+        <SCPiece id={id} className={`piece ${getCubeTypeClass()}`} 
             style={style} $custom={customColor} 
         >
             {faces.map(({position}) => {

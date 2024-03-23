@@ -2,17 +2,13 @@ import { useState, useContext, createContext } from "react";
 
 export const CubeContext = createContext({});
 export function CubeProvider({children}) {
-    const [action, setAction] = useState("init");
+    const [action, setAction] = useState();
     const [cubeRotate, setCubeRotate] = useState([-35, -45]);
     const [cubeCommand, setCubeCommand] = useState([]);
     const [commandMapping, setCommandMapping] = useState({
-        U: "U",
-        D: "D",
-        F: "F",
-        R: "R",
-        B: "B",
-        L: "L",
+        U: "U", D: "D", F: "F", R: "R", B: "B", L: "L",
     });
+    const [selectedColor, setSelectedColor] = useState("red");
 
     return (
         <CubeContext.Provider value={{
@@ -20,6 +16,7 @@ export function CubeProvider({children}) {
             cubeRotate, setCubeRotate,
             cubeCommand, setCubeCommand,
             commandMapping, setCommandMapping,
+            selectedColor, setSelectedColor,
         }}>
             {children}
         </CubeContext.Provider>
@@ -64,7 +61,16 @@ export const useCommandMapping = () => {
             B: ySide[2],
             L: ySide[3],
         });
-        console.log(...xSide, ...ySide);
     };
     return [commandMapping, changeCommandMapping];
+}
+export const useSelectedColor = () => {
+    const {selectedColor, setSelectedColor} = useContext(CubeContext);
+    const colors = ["red", "green", "white", "yellow", "blue", "orange", "finish"];
+    const updateSelectedColor = (targetColor = null) => {
+        const i = colors.findIndex((v) => v === selectedColor);
+        const color = targetColor || colors[i + 1 === colors.length ? 0 : i + 1];
+        setSelectedColor(color);
+    };
+    return [selectedColor, updateSelectedColor];
 }

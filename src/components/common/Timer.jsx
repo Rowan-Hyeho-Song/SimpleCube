@@ -63,7 +63,9 @@ function Timer({
             timeRef.current = setInterval((type === "timer" ? timer : stopwatch), interval);
         } else {
             clearInterval(timeRef.current);
-            setTime(start);
+            if (state !== "saveRecords") {
+                setTime(start);
+            }
         }
     };
 

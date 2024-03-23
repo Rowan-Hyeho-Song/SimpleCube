@@ -147,6 +147,7 @@ function Guide({
 
 function CubeContainer({
 }) {
+    const [mode] = useMode();
     const [cubeType] = useCubeType();
     const [penalty] = usePenalty();
     const [cubeRotate, setCubeRotate] = useCubeRotate();
@@ -171,7 +172,7 @@ function CubeContainer({
         setCubeRotate([-35, -45]);
         setCommandMapping([-35, -45]);
         setAction("init");
-    }, [cubeType, penalty]);
+    }, [cubeType, penalty, mode]);
 
     const mousedown = (md_e) => {
         const md_event = EventUtil.getEventByDevice(viewMode, md_e);
